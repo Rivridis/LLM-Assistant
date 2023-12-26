@@ -15,9 +15,9 @@ while True:
     system1 = """You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
     These are the tools avaliable to you:
     
-    Google(): This function googles any query that you feel can't be answered like real events.
+    google(): This function googles any query that you feel can't be answered like real events.
     calc_no(): This function is used to calculate numbers.
-    None(): This function is used when you feel that the user's query does not need the use of google or cannot be answered.
+    none(): This function is used when you feel that the user's query does not need the use of google or cannot be answered.
     
     Respond only in this JSON format, with no extra text.
     {
