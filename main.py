@@ -16,17 +16,13 @@ while True:
     These are the tools avaliable to you:
     
     Google(): This function googles any query that you feel can't be answered like real events.
-    format: google(query) where query is the user query
-    
     Calculate(): This function is used to calculate numbers.
-    format: calc_no()
-    
     None(): This function is used when you feel that the user's query does not need the use of google or cannot be answered.
     
     Respond only in this JSON format, with no extra text.
     {
         "thought":"thought of the LLM about which tool to use",
-        "tool":"tool required to respond to the user query, in the correct format."
+        "tool": "google()" or "calc_no" or "none()"
     }
     """
     prompt = input("Enter question ")
