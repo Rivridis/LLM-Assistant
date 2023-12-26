@@ -16,7 +16,7 @@ while True:
     These are the tools avaliable to you:
     
     Google(): This function googles any query that you feel can't be answered like real events.
-    Calculate(): This function is used to calculate numbers.
+    calc_no(): This function is used to calculate numbers.
     None(): This function is used when you feel that the user's query does not need the use of google or cannot be answered.
     
     Respond only in this JSON format, with no extra text.
