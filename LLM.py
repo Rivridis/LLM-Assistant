@@ -10,51 +10,56 @@ llm = Llama(
   n_batch=512    
 )
 
-system1 = """You are an AI model that is trained for giving search topics to user's questions. give 3 search topics that might answer the user's queries in a strict list format. You do not respond to the user query directly, and you follow the formatting. searches should be made up of only sentences.
+while True:
+     
+    system1 = """You are an AI model that is trained for giving search topics to user's questions. give 3 search topics that might answer the user's queries in a strict list format.
+If you get a question with calculations, extract the numbers to be calculated and put it in form of a google search. Put all responses in form of a python list.
 
-["search1","search2",search3"]
-"""
-prompt = "when was narendera modi born?"
+All responses must follow the format:["search1","search2",search3"]"""
+    
+    prompt = input("Enter question ")
 
-output = llm(
-  "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system1,prompt),
-  max_tokens=-1,
-  stop=["<|im_start|>","<|im_end|>"],
-  temperature=0.8,
-  top_k=40,
-  repeat_penalty=1.1,
-  min_p=0.05,
-  top_p=0.95,
-  echo=False
-)
-search_list = eval(output['choices'][0]['text'])
-rlist = []
-with DDGS() as ddgs:
-    for r in ddgs.text(search_list[0],max_results=2):
-            rlist.append(r)
-rfinlist = []
-rfinlist.append(rlist[0]['body'])
-rfinlist.append(rlist[1]['body'])
+    output = llm(
+    "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system1,prompt),
+    max_tokens=-1,
+    stop=["<|im_start|>","<|im_end|>"],
+    temperature=0.8,
+    top_k=40,
+    repeat_penalty=1.1,
+    min_p=0.05,
+    top_p=0.95,
+    echo=False
+    )
+    search_list = eval(output['choices'][0]['text'])
+    print(search_list)
+    rlist = []
+    with DDGS() as ddgs:
+        for r in ddgs.text(search_list[0],max_results=2):
+                rlist.append(r)
+    rfinlist = []
+    rfinlist.append(rlist[0]['body'])
+    rfinlist.append(rlist[1]['body'])
+    print(rfinlist)
 
-system2="""using the google search results, formulate the best response for the user.
-Results:{},{}
-""".format(rfinlist[0],rfinlist[1])
-print(system2)
+    system2="""using the google search results, formulate the best response for the user.
+    Results:{},{}
+    """.format(rfinlist[0],rfinlist[1])
 
-output = llm(
-  "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2,prompt),
-  max_tokens=300,
-  stop=["<|im_start|>","<|im_end|>"],
-  temperature=0.8,
-  top_k=40,
-  repeat_penalty=1.1,
-  min_p=0.05,
-  top_p=0.95,
-  echo=False,
-  stream=True,
+    output = llm(
+    "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2,prompt),
+    max_tokens=300,
+    stop=["<|im_start|>","<|im_end|>"],
+    temperature=0.8,
+    top_k=40,
+    repeat_penalty=1.1,
+    min_p=0.05,
+    top_p=0.95,
+    echo=False,
+    stream=True,
 
-)
-print("\n")
-print("Final Answer")
-for token in output:
-    print(token["choices"][0]["text"],end="")
+    )
+    print("\n")
+    print("Final Answer")
+    for token in output:
+        print(token["choices"][0]["text"],end="")
+    print("\n")
