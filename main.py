@@ -18,7 +18,7 @@ while True:
     
     google(query): This function googles any query that you feel can't be answered like real events. Takes string input e.g google(how old is the moon)
     calc_no(query): This function is used to calculate numbers. Takes string input e.g. calc_no(34*67+34*3).
-    date_time_weather(): This function is used when user asks about date, time and weather. Returns the date, time and weather.
+    date_time_weather(): This function is used when user asks current date, time and weather.
     none(): This function is used when you feel that the user is just chatting with the language model. Also use this function to refer back to previous conversations.
     end(): This function is called when the LLM feels the user wants to end the conversation.
     
