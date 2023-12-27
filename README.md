@@ -8,6 +8,8 @@ An attempt to make a locally running LLM have internet access and be able to use
 ⭐ Knows when to call functions<br/>
 
 # Planned Features
-⭐ Grammar to constrain model output<br/>
-⭐ Better error handling<br/>
-⭐ Calling multiple functions at once
+🔨 Grammar to constrain model output<br/>
+🔨 Better error handling<br/>
+🔨 Calling multiple functions at once
+🔨 Vector Database
+
