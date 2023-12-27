@@ -13,16 +13,16 @@ llm = Llama(
 while True:
      
     system1 = """You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
-    These are the tools avaliable to you:
+    These are the python functions avaliable to you. Make sure to follow the correct python function call format.
     
-    google(): This function googles any query that you feel can't be answered like real events.
-    calc_no(): This function is used to calculate numbers.
-    none(): This function is used when you feel that the user's query does not need the use of google or cannot be answered.
+    google(query): This function googles any query that you feel can't be answered like real events. Takes string input.
+    calc_no(query): This function is used to calculate numbers. Takes string input e.g. calc_no(34*67+34*3).
+    none(): This function is used when you feel that the user is just chatting with the language model.
     
     Respond only in this JSON format, with no extra text.
     {
         "thought":"thought of the LLM about which tool to use",
-        "tool": "google()" or "calc_no" or "none()"
+        "tool": "google()" or "calc_no()" or "none()"
     }
     """
     prompt = input("Enter question ")
@@ -40,3 +40,4 @@ while True:
     )
     search_list = output['choices'][0]['text']
     print(search_list)
+    llm.reset()
