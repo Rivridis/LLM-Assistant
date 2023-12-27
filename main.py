@@ -20,11 +20,12 @@ while True:
     calc_no(query): This function is used to calculate numbers. Takes string input e.g. calc_no(34*67+34*3).
     date_time_weather(): This function is used when user asks about date, time and weather. Returns the date, time and weather.
     none(): This function is used when you feel that the user is just chatting with the language model. Also use this function to refer back to previous conversations.
+    end(): This function is called when the LLM feels the user wants to end the conversation.
     
     Respond only in this JSON format, with no extra text.
     {
         "thought":"thought of the LLM about which tool to use",
-        "tool": "google(query to be googled)" or "calc_no()" or "none()" or "date_time_weather()"
+        "tool": "google(query to be googled)" or "calc_no()" or "none()" or "date_time_weather() or end()"
     }
     """
     prompt = input("Enter question ")
@@ -89,8 +90,9 @@ while True:
         pattern = r"\(([^)]+)\)"
         matches = re.findall(pattern, str(search_dict['tool']))
         with DDGS() as ddgs:
-          for r in ddgs.text(str(matches[0]),max_results=1):
+          for r in ddgs.text(str(matches[0]),max_results=1,region="in-en"):
             system4+=str(r['body'])
+            print(r['body'])
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system4,prompt),
         max_tokens=-1,
@@ -104,6 +106,8 @@ while True:
         )
         print(output['choices'][0]['text'])
         chat_memory+="user {}\nassistant {}".format(prompt,output['choices'][0]['text'])
-        
+    else:
+       print("Cyaa!")
+       break
             
     llm.reset()
