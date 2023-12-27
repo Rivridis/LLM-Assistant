@@ -1,5 +1,6 @@
 from llama_cpp import Llama
 from duckduckgo_search import DDGS
+import re
 
 # Set gpu_layers to the number of layers to offload to GPU. Set to 0 if no GPU acceleration is available on your system.
 llm = Llama(
@@ -9,9 +10,9 @@ llm = Llama(
   n_gpu_layers=35,
   n_batch=512    
 )
+chat_memory = ""
 
 while True:
-     
     system1 = """You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
     These are the python functions avaliable to you. Make sure to follow the correct python function call format.
     
@@ -40,4 +41,47 @@ while True:
     )
     search_dict = eval(output['choices'][0]['text'])
     print(search_dict)
+    
+    if search_dict['tool'] == "none()":
+        system2 = """You are an AI chat assistant trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized conversation history.
+        """
+        prompt = input("Enter question ")
+
+        output = llm(
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2+chat_memory,prompt),
+        max_tokens=-1,
+        stop=["<|im_start|>","<|im_end|>"],
+        temperature=0.8,
+        top_k=40,
+        repeat_penalty=1.1,
+        min_p=0.05,
+        top_p=0.95,
+        echo=False
+        )
+        print(output['choices'][0]['text'])
+        chat_memory+="user: {}\nassistant: {}".format(prompt,output['choices'][0]['text'])
+        
+        if len(chat_memory) > 6000:
+            system3 = """You are an AI that summarises the given chat history to the least words possible, while extracting and preserving key information.
+            """
+            output = llm(
+            "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system3,chat_memory),
+            max_tokens=-1,
+            stop=["<|im_start|>","<|im_end|>"],
+            temperature=0.8,
+            top_k=40,
+            repeat_penalty=1.1,
+            min_p=0.05,
+            top_p=0.95,
+            echo=False
+            )
+            chat_memory = output['choices'][0]['text']
+    
+    elif "calc_no" in search_dict['tool']:
+        pattern = r'\(([^)]+)\)'
+        match = re.search(pattern, str(search_dict['tool']))
+        if match:
+          numeric_equation = match.group(1)
+          print(numeric_equation)
+            
     llm.reset()
