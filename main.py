@@ -40,5 +40,4 @@ while True:
     )
     search_dict = eval(output['choices'][0]['text'])
     print(search_dict)
-    print(type(search_dict))
     llm.reset()
