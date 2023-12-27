@@ -38,6 +38,7 @@ while True:
     top_p=0.95,
     echo=False
     )
-    search_list = output['choices'][0]['text']
-    print(search_list)
+    search_dict = eval(output['choices'][0]['text'])
+    print(search_dict)
+    print(type(search_dict))
     llm.reset()
