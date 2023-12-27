@@ -9,4 +9,5 @@ An attempt to make a locally running LLM have internet access and be able to use
 
 # Planned Features
 ⭐ Grammar to constrain model output<br/>
-⭐ Better error handling
+⭐ Better error handling<br/>
+⭐ Calling multiple functions at once
