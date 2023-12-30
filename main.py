@@ -1,10 +1,22 @@
-from llama_cpp import Llama
+from llama_cpp import Llama,LlamaGrammar
 from duckduckgo_search import DDGS
 import re
 
+grmtxt = r'''
+root ::= answer
+answer ::= "{"   ws   "\"thought\":"   ws   string   ","   ws   "\"tool\":"   ws   string   "}"
+answerlist ::= "[]" | "["   ws   answer   (","   ws   answer)*   "]"
+string ::= "\""   ([^"]*)   "\""
+boolean ::= "true" | "false"
+ws ::= [ \t\n]*
+number ::= [0-9]+   "."?   [0-9]*
+stringlist ::= "["   ws   "]" | "["   ws   string   (","   ws   string)*   ws   "]"
+numberlist ::= "["   ws   "]" | "["   ws   string   (","   ws   number)*   ws   "]"
+'''
+grammar = LlamaGrammar.from_string(grmtxt)
 # Set gpu_layers to the number of layers to offload to GPU. Set to 0 if no GPU acceleration is available on your system.
 llm = Llama(
-  model_path=r"B:\AI\Mistral\TheBloke\dolphin-2.2.1-mistral-7b.Q5_K_M.gguf\dolphin-2.2.1-mistral-7b.Q5_K_M.gguf", 
+  model_path=r"B:\AI\Mistral\TheBloke\NeuralHermes-2.5-Mistral-7B-GGUF\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", 
   n_ctx=2048,  
   n_threads=4,            
   n_gpu_layers=35,
@@ -13,7 +25,8 @@ llm = Llama(
 chat_memory = ""
 
 while True:
-    system1 = """You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
+    system1 = """
+    You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
     These are the python functions avaliable to you. Make sure to follow the correct python function call format.
     
     google(query): This function googles any query that you feel can't be answered like real events. Takes string input e.g google(how old is the moon)
@@ -21,8 +34,8 @@ while True:
     date_time_weather(): This function is used when user asks current date, time and weather.
     none(): This function is used when you feel that the user is just chatting with the language model. Also use this function to refer back to previous conversations.
     end(): This function is called when the LLM feels the user wants to end the conversation.
-    
-    Respond only in this JSON format, with no extra text.
+
+     Respond only in this JSON format.
     {
         "thought":"thought of the LLM about which tool to use",
         "tool": "google(query to be googled)" or "calc_no()" or "none()" or "date_time_weather() or end()"
@@ -39,13 +52,14 @@ while True:
     repeat_penalty=1.1,
     min_p=0.05,
     top_p=0.95,
-    echo=False
+    echo=False,
+    grammar=grammar
     )
     search_dict = eval(output['choices'][0]['text'])
     print(search_dict)
     
     if search_dict['tool'] == "none()":
-        system2 = """You are an AI chat assistant named LUNA, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized conversation history.
+        system2 = """You are an AI chat assistant named LUNA, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
         """
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2+chat_memory,prompt),
