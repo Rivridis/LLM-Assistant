@@ -1,6 +1,10 @@
 from llama_cpp import Llama,LlamaGrammar
-from duckduckgo_search import DDGS
+import requests
+from googlesearch import search
 import re
+from bs4 import BeautifulSoup
+import os
+from duckduckgo_search import DDGS
 
 grmtxt = r'''
 root ::= answer
@@ -19,7 +23,7 @@ llm = Llama(
   model_path=r"B:\AI\Mistral\TheBloke\NeuralHermes-2.5-Mistral-7B-GGUF\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", 
   n_ctx=2048,  
   n_threads=4,            
-  n_gpu_layers=35,
+  n_gpu_layers=30,
   n_batch=512    
 )
 chat_memory = ""
@@ -41,7 +45,7 @@ while True:
         "tool": "google(query to be googled)" or "calc_no()" or "none()" or "date_time_weather() or end()"
     }
     """
-    prompt = input("Enter question ")
+    prompt = input("Enter question: ")
 
     output = llm(
     "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system1,prompt),
@@ -99,14 +103,24 @@ while True:
           print(eval(numeric_equation))
     
     elif "google" in search_dict["tool"]:
-        system4 = """You are an AI chat assistant named LUNA, trained to help the user with any of their questions, having connection to the internet. You are provided with the result of the google search of user's query below. Use the information to formulate the best response to the user's query.
+        system4 = """You are an AI chat assistant named LUNA, trained to help the user with any of their questions, having connection to the internet. You are provided with the HTML page result of the google search of user's query below. Use the information to formulate the best response to the user's query. Go through the HTML page carefully
         """
         pattern = r"\(([^)]+)\)"
         matches = re.findall(pattern, str(search_dict['tool']))
+        url = search(str(matches[0]), num_results=1)
+        link = ""
         with DDGS() as ddgs:
-          for r in ddgs.text(str(matches[0]),max_results=1,region="in-en"):
-            system4+=str(r['body'])
-            print(r['body'])
+            for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=2):
+                link = r["href"]
+        header = {'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'}
+        resp = requests.get(link,headers=header)
+        html = resp.text
+        soup = BeautifulSoup(html, "html.parser")
+        text = soup.body.get_text().strip()
+        text = os.linesep.join([s for s in text.splitlines() if s])
+        system4 += text
+        print(system4)
+        
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system4,prompt),
         max_tokens=-1,
