@@ -5,9 +5,7 @@ import re
 from bs4 import BeautifulSoup
 import os
 from duckduckgo_search import DDGS
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize
+
 
 grmtxt = r'''
 root ::= answer
