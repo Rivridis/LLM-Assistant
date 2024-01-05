@@ -5,6 +5,9 @@ import re
 from bs4 import BeautifulSoup
 import os
 from duckduckgo_search import DDGS
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize
 
 grmtxt = r'''
 root ::= answer
@@ -36,14 +39,14 @@ while True:
     google(query): This function is used only when you can't answer a question, and need factual details.
     input : How old is the moon?
     output : {"thought":"I need to google this query", "tool": "google(how old is the moon)"}
+
+    location(): This function is used when the user needs details about weather, date, time, basically if you need location data for an answer.
+    input: Where am I located, and how cold is it here today?
+    output : {"thought":"I need the location for this question", "tool": "location()"}
     
     calc_no(query): This function is used to calculate numbers.
     input: what is 23*657/345
     output: {"thought":"I need to calculate this value", "tool": "calc_no(23*657/345)"}
-    
-    date_time_weather(): This function is used when user asks current date, time and weather.
-    input: What is the date today?
-    output: {"thought":"I need find the date", "tool": "date_time_weather()"}
     
     none(): This function is used when you feel that the user is just chatting with the language model. Also use this function to refer back to previous conversations or questions.
     input: Hello! how are you today?
@@ -55,7 +58,7 @@ while True:
     input: I want to go to bed, goodnight!
     output: {"thought":"The user wants to end conversation", "tool": "end()"}
 
-    Below is the summarized chat memory to help make your choices better:
+    Below is the chat memory to help make your choices better:
     """
     prompt = input("Enter question: ")
     output = llm(
@@ -133,8 +136,13 @@ while True:
         mainp = ''
         for paragraph in paragraphs:
             mainp += paragraph.get_text()
+        if len(mainp) > 6000:
+            mainp = mainp[:6000]
+            system4+= mainp
+        
+        else:
+            system4 += mainp
         print(mainp)
-        system4 += mainp
         
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system4,prompt),
