@@ -130,10 +130,18 @@ while True:
         resp = requests.get(link,headers=header)
         html = resp.text
         soup = BeautifulSoup(html, "html.parser")
-        paragraphs = soup.find_all('p')
+        
+        code_blocks = soup.find_all('code')
+        paragraphs = soup.find_all('p') 
+        
         mainp = ''
+        
         for paragraph in paragraphs:
             mainp += paragraph.get_text()
+        
+        for code_block in code_blocks:
+            mainp += code_block.get_text()
+        
         if len(mainp) > 6000:
             mainp = mainp[:6000]
             system4+= mainp
