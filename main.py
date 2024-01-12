@@ -55,7 +55,7 @@ while True:
     end(): This function is called when the LLM feels the user wants to end the conversation.
     input: I want to go to bed, goodnight!
     output: {"thought":"The user wants to end conversation", "tool": "end()"}
-
+    
     Below is the chat memory to help make your choices better:
     """
     prompt = input("Enter question: ")
@@ -126,7 +126,7 @@ while True:
         with DDGS() as ddgs:
             for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=2):
                 link = r["href"]
-        header = {'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'}
+        header = {'User-Agent': ''}
         resp = requests.get(link,headers=header)
         html = resp.text
         soup = BeautifulSoup(html, "html.parser")
