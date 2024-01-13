@@ -6,10 +6,13 @@ An attempt to make a locally running LLM have internet access and be able to use
 ⭐ Can search for information<br/>
 ⭐ Has functions to handle calculations<br/>
 ⭐ Knows when to call functions<br/>
+⭐ Gradio UI<br/>
 
 # Planned Features
 🔨 Better error handling<br/>
 🔨 Calling multiple functions at once<br/>
 🔨 Vector Database<br/>
-🔨 Better search feature
+
+# Images
+![image](https://github.com/Rivridis/LLM-Assistant/assets/97879757/a93bf7d1-7ede-4908-b643-be46b20df9a6)
 
