@@ -60,6 +60,8 @@ while True:
     output: {"thought":"The user is just chatting with me", "tool": "none()"}
     input: Please provide me the reciepe for the cake you mentioned earlier
     output: {"thought":"The user wants to refer back to chat history", "tool": "none()"}
+    input: Continue
+    output: {"thought":"The user wants to refer back to chat history", "tool": "none()"}
     
     end(): This function is called when the LLM feels the user wants to end the conversation.
     input: I want to go to bed, goodnight!
@@ -82,7 +84,6 @@ while True:
     )
     search_dict = eval(output['choices'][0]['text'])
     print(search_dict)
-    print(chat_memory)
     
     if search_dict['tool'] == "none()":
         system2 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
