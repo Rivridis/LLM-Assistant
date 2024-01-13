@@ -7,6 +7,7 @@ import os
 from duckduckgo_search import DDGS
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
+import gradio as gr
 
 
 software_names = [SoftwareName.CHROME.value]
@@ -38,7 +39,9 @@ llm = Llama(
 )
 chat_memory = ""
 
-while True:
+def chat(message,history):
+    global chat_memory
+
     system1 = """
     You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
     These are the python functions avaliable to you. Make sure to call the correct function, and respond as given in the output example.
@@ -69,7 +72,7 @@ while True:
     
     Below is the chat memory to help make your choices better:
     """
-    prompt = input("Enter question: ")
+    prompt = message
     output = llm(
     "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system1+chat_memory,prompt),
     max_tokens=-1,
@@ -83,7 +86,6 @@ while True:
     grammar=grammar
     )
     search_dict = eval(output['choices'][0]['text'])
-    print(search_dict)
     
     if search_dict['tool'] == "none()":
         system2 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
@@ -99,7 +101,6 @@ while True:
         top_p=0.95,
         echo=False
         )
-        print(output['choices'][0]['text'])
 
         chat_memory+="user: {}\nassistant: {}\n".format(prompt,output['choices'][0]['text'])
         
@@ -118,13 +119,15 @@ while True:
             echo=False
             )
             chat_memory = output['choices'][0]['text']
+        
+        return(output['choices'][0]['text'])
     
     elif "calc_no" in search_dict['tool']:
         pattern = r'\(([^)]+)\)'
         match = re.search(pattern, str(search_dict['tool']))
         if match:
           numeric_equation = str(match.group(1))
-          print(eval(numeric_equation))
+          return(str(eval(numeric_equation)))
     
     elif "google" in search_dict["tool"]:
         system4 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, having connection to the internet. You are provided with the search result of the google search of user's query below. Use the information to formulate the best response to the user's query. Go through the paragraphs carefully.
@@ -158,7 +161,6 @@ while True:
         
         else:
             system4 += mainp
-        print(mainp)
         
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system4,prompt),
@@ -171,10 +173,18 @@ while True:
         top_p=0.95,
         echo=False
         )
-        print(output['choices'][0]['text'])
         chat_memory+="user: {}\nassistant: {}\n".format(prompt,output['choices'][0]['text'])
+        return(output['choices'][0]['text'])
     else:
-       print("Cyaa!")
-       break
+       return "See you later!"
             
     llm.reset()
+    return()
+
+gr.ChatInterface(chat,
+    chatbot=gr.Chatbot(height=400),
+    textbox=gr.Textbox(placeholder="Enter Question", container=False, scale=7),
+    title="AI Assistant",
+    theme="soft",
+    examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
+    clear_btn="Clear",).launch()
