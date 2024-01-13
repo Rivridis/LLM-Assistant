@@ -5,6 +5,15 @@ import re
 from bs4 import BeautifulSoup
 import os
 from duckduckgo_search import DDGS
+from random_user_agent.user_agent import UserAgent
+from random_user_agent.params import SoftwareName, OperatingSystem
+
+
+software_names = [SoftwareName.CHROME.value]
+operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]   
+
+user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
+user_agent = user_agent_rotator.get_random_user_agent()
 
 
 grmtxt = r'''
@@ -76,7 +85,7 @@ while True:
     print(chat_memory)
     
     if search_dict['tool'] == "none()":
-        system2 = """You are an AI chat assistant named LUNA, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
+        system2 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
         """
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2+chat_memory,prompt),
@@ -117,7 +126,7 @@ while True:
           print(eval(numeric_equation))
     
     elif "google" in search_dict["tool"]:
-        system4 = """You are an AI chat assistant named LUNA, trained to help the user with any of their questions, having connection to the internet. You are provided with the search result of the google search of user's query below. Use the information to formulate the best response to the user's query. Go through the paragraphs carefully.
+        system4 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, having connection to the internet. You are provided with the search result of the google search of user's query below. Use the information to formulate the best response to the user's query. Go through the paragraphs carefully.
         """
         pattern = r"\(([^)]+)\)"
         matches = re.findall(pattern, str(search_dict['tool']))
@@ -126,10 +135,10 @@ while True:
         with DDGS() as ddgs:
             for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=2):
                 link = r["href"]
-        header = {'User-Agent': ''}
+        header = {'User-Agent': '{}'.format(user_agent)}
         resp = requests.get(link,headers=header)
         html = resp.text
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")  
         
         code_blocks = soup.find_all('code')
         paragraphs = soup.find_all('p') 
