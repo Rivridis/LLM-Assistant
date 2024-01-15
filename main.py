@@ -238,3 +238,5 @@ gr.ChatInterface(chat,
     theme="soft",
     examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
     clear_btn="Clear",).launch()
+
+# To do : Prevent prompt from bleeding into other tools by changing the none function.
