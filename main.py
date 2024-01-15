@@ -17,7 +17,7 @@ user_agent = user_agent_rotator.get_random_user_agent()
 # GBNF Grammar
 grmtxt = r'''
 root ::= answer
-answer ::= "{"   ws   "\"thought\":"   ws   string   ","   ws   "\"tool\":"   ws   string   "}"
+answer ::= "{"   ws   "\"thought\":"   ws   string   ","   ws   "\"tool\":"   ws   stringlist   "}"
 answerlist ::= "[]" | "["   ws   answer   (","   ws   answer)*   "]"
 string ::= "\""   ([^"]*)   "\""
 boolean ::= "true" | "false"
@@ -46,31 +46,57 @@ def chat(message,history):
     global chat_memory
     system1 = """
     You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
-    These are the python functions available to you. Make sure to call the correct function, and respond as given in the output example.
+    These are modules available to you. Make sure to call the correct function, and respond as given in the output example.
     
     google(query): This function is used only when you can't answer a question, and need factual details.
+    Example:
     input : How old is the moon?
-    output : {"thought":"I need to google this query", "tool": "google(how old is the moon)"}
+    output : {"thought":"I need to google this query", "tool": ["google(how old is the moon)"]}
 
-    location(): This function is used when the user needs details about weather, date, time, basically if you need location data for an answer.
+    date_loc(): This function is used when the user needs details about weather, date, time, basically if you need location data for an answer.
+    Example:
     input: Where am I located, and how cold is it here today?
-    output : {"thought":"I need the location for this question", "tool": "location()"}
+    output : {"thought":"I need the location for this question", "tool": ["date_loc()"]}
+
+    MUSIC MODULE
+    music_play(name): This function is used when the user needs details about music currently playing in their system, or its status.
+    music_pause(): This function is used to pause music
+    music_get(): This function is used to get currently playing music.
+    Example:
+    input: play never gonna give you up
+    output : {"thought":"I need to play music", "tool": ["music_play(never gonna give you up)"]}
+
+    input: what music is playing?
+    output : {"thought":"I need to check current music", "tool": ["music_get()"]}
+
+    Mail Module
+    mail_get(): This function is used when the user wants to read their mails
+    Example:
+    input: read my mails please
+    output : {"thought":"I need use the mail module", "tool": ["mail()"]}
     
     calc_no(query): This function is used to calculate numbers.
+    Example:
     input: what is 23*657/345
-    output: {"thought":"I need to calculate this value", "tool": "calc_no(23*657/345)"}
+    output: {"thought":"I need to calculate this value", "tool": ["calc_no(23*657/345)"]}
     
     none(): This function is used when you feel that the user is just chatting with the language model. Also use this function to refer back to previous conversations or questions.
+    Example:
     input: Hello! how are you today?
-    output: {"thought":"The user is just chatting with me", "tool": "none()"}
+    output: {"thought":"The user is just chatting with me", "tool": ["none()"]}
     input: Please provide me the reciepe for the cake you mentioned earlier
-    output: {"thought":"The user wants to refer back to chat history", "tool": "none()"}
+    output: {"thought":"The user wants to refer back to chat history", "tool": ["none()"]}
     input: Continue
-    output: {"thought":"The user wants to refer back to chat history", "tool": "none()"}
+    output: {"thought":"The user wants to refer back to chat history", "tool": ["none()"]}
     
     end(): This function is called when the LLM feels the user wants to end the conversation.
+    Example:
     input: I want to go to bed, goodnight!
-    output: {"thought":"The user wants to end conversation", "tool": "end()"}
+    output: {"thought":"The user wants to end conversation", "tool": ["end()"]}
+
+    Example:
+    input: what music is playing on my system? and what is 122-7?
+    output: {"thought":"I need to call multiple modules", "tool": ["music_get()","calc_no(122-7)"]}
     
     Below is the chat memory to help make your choices better:
     """
@@ -87,7 +113,8 @@ def chat(message,history):
     echo=False,
     grammar=grammar
     )
-    search_dict = eval(output['choices'][0]['text'])
+    search_dict = output['choices'][0]['text']
+    return(search_dict)
     
     # Normal Chatting
     if search_dict['tool'] == "none()":
