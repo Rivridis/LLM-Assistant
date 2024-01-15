@@ -46,7 +46,7 @@ def chat(message,history):
     global chat_memory
     system1 = """
     You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
-    These are the python functions avaliable to you. Make sure to call the correct function, and respond as given in the output example.
+    These are the python functions available to you. Make sure to call the correct function, and respond as given in the output example.
     
     google(query): This function is used only when you can't answer a question, and need factual details.
     input : How old is the moon?
