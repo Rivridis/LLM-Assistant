@@ -97,6 +97,10 @@ def chat(message,history):
     Example:
     input: what music is playing on my system? and what is 122-7?
     output: {"thought":"I need to call multiple modules", "tool": ["music_get()","calc_no(122-7)"]}
+
+    Example:
+    input: reccomend me a good music, and play it
+    output: {"thought":"reccomending a music for you to play", "tool": ["music_play(Sparkle kimi no na wa)"]}
     
     Below is the chat memory to help make your choices better:
     """
