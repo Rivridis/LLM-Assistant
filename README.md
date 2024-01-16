@@ -10,7 +10,6 @@ An attempt to make a locally running LLM have internet access and be able to use
 
 # Planned Features
 🔨 Better error handling<br/>
-🔨 Calling multiple functions at once<br/>
 🔨 Vector Database<br/>
 
 # Images
