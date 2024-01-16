@@ -82,14 +82,14 @@ def chat(message,history):
     input: what is 23*657/345
     output: {"thought":"I need to calculate this value", "tool": ["calc_no(23*657/345)"]}
     
-    none(): This function is used when you feel that the user is just chatting with the language model. Also use this function to refer back to previous conversations or questions.
+    chat(user input): This function is used when you feel that the user is chatting with the language model. Also use this function to refer back to previous conversations or questions. Replace user input with the user's chat input.
     Example:
     input: Hello! how are you today?
-    output: {"thought":"The user is just chatting with me", "tool": ["none()"]}
+    output: {"thought":"The user is just chatting with me", "tool": ["chat(Hello! how are you today)"]}
     input: Please provide me the reciepe for the cake you mentioned earlier
-    output: {"thought":"The user wants to refer back to chat history", "tool": ["none()"]}
+    output: {"thought":"The user wants to refer back to chat history", "tool": ["chat(Please provide me the reciepe for the cake you mentioned earlier)"]}
     input: Continue
-    output: {"thought":"The user wants to refer back to chat history", "tool": ["none()"]}
+    output: {"thought":"The user wants to refer back to chat history", "tool": ["chat(continue what you said)"]}
     
     end(): This function is called when the LLM feels the user wants to end the conversation.
     Example:
@@ -103,6 +103,11 @@ def chat(message,history):
     Example:
     input: reccomend me a good music, and play it
     output: {"thought":"reccomending a music for you to play", "tool": ["music_play(Sparkle kimi no na wa)"]}
+
+    Example:
+    input: How are you today, Luna, and what is 233*9?
+    output: {"thought":"The user is chatting as well as asking for a calculation", "tool": ["chat(How are you today, Luna)","calc_no(233*9)"]}
+
     
     Below is the chat memory to help make your choices better:
     """
@@ -127,11 +132,13 @@ def chat(message,history):
     
     for i in search_list:
         # Normal Chatting
-        if i == "none()":
+        if "chat" in i:
             system2 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
             """
+            pattern = r"\(([^)]+)\)"
+            matches = re.findall(pattern, str(i))
             output = llm(
-            "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2+chat_memory,prompt),
+            "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2+chat_memory,matches),
             max_tokens=-1,
             stop=["<|im_start|>","<|im_end|>"],
             temperature=0.8,
@@ -238,5 +245,3 @@ gr.ChatInterface(chat,
     theme="soft",
     examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
     clear_btn="Clear",).launch()
-
-# To do : Prevent prompt from bleeding into other tools by changing the none function.
