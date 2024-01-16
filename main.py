@@ -231,7 +231,7 @@ def chat(message,history):
             opt += "\n"
 
         else:
-            return "Function not created yet"
+            opt += "Function not created yet"
                 
         llm.reset()
     
