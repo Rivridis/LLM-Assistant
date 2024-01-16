@@ -48,17 +48,21 @@ def chat(message,history):
     You are an AI model that is trained in tool and function calling. Think through the question, and return what all functions to call and how to call them, to give the best response to user's question.
     These are modules available to you. Make sure to call the correct function, and respond as given in the output example.
     
-    google(query): This function is used only when you can't answer a question, and need factual details.
+    google(query): This function is used only when you can't answer a question, and need factual details, or you need to search something.
     Example:
     input : How old is the moon?
     output : {"thought":"I need to google this query", "tool": ["google(how old is the moon)"]}
     input : search for fun things to do
     output : {"thought":"I need to search this up", "tool": ["google(fun things to do)"]}
 
-    date_loc(): This function is used when the user needs details about weather, date, time, basically if you need location data for an answer.
+    date_time(location): This function is used when the user needs the date and time of a given location. Default location is Texas, USA
     Example:
-    input: Where am I located, and how cold is it here today?
-    output : {"thought":"I need the location for this question", "tool": ["date_loc()"]}
+    input: What is the current date and time?
+    output : {"thought":"I need the location for this question", "tool": ["date_time(Texas, USA)"]}
+
+    weather(location):This function is used when the user needs the weather of a given location. Default location is Texas, USA
+    input: What is the current date and time?
+    output : {"thought":"I need the location for this question", "tool": ["weather(Texas, USA)"]}
 
     MUSIC MODULE
     music_play(name): This function is used when the user needs details about music currently playing in their system, or its status.
@@ -67,11 +71,10 @@ def chat(message,history):
     Example:
     input: play never gonna give you up
     output : {"thought":"I need to play music", "tool": ["music_play(never gonna give you up)"]}
-
     input: what music is playing?
     output : {"thought":"I need to check current music", "tool": ["music_get()"]}
 
-    Mail Module
+    MAIL MODULE
     mail_get(): This function is used when the user wants to read their mails
     Example:
     input: read my mails please
@@ -107,6 +110,10 @@ def chat(message,history):
     Example:
     input: How are you today, Luna, and what is 233*9?
     output: {"thought":"The user is chatting as well as asking for a calculation", "tool": ["chat(How are you today, Luna)","calc_no(233*9)"]}
+
+    Example:
+    input: search for a good chocolate
+    output: {"thought":"I need to use the search function", "tool": ["google(good chocolate brands)"]}
 
     
     Below is the chat memory to help make your choices better:
@@ -229,9 +236,6 @@ def chat(message,history):
             chat_memory+="user: {}\nassistant: {}\n".format(prompt,output['choices'][0]['text'])
             opt += output['choices'][0]['text']
             opt += "\n"
-
-        else:
-            opt += "Function not created yet"
                 
         llm.reset()
     
