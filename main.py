@@ -58,10 +58,13 @@ def chat(message,history):
     '''Takes in a query string and returns search result. This function is only used when the user specifies the word search'''
     
     def weather(location)
-    '''Takes in location, and returns weather. Default location value is given by Current Location variable'''
+    '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations'''
 
     def play(music_name)
-    '''Takes in music name, and plays the music in system'''
+    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists.'''
+
+    def pause()
+    '''Pauses any music playing in system'''
 
     def read_mail()
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
@@ -78,10 +81,10 @@ def chat(message,history):
     Why do you even want to know the age of the moon? It's much older than you that is for sure. I shall search for it and let you know
     {"Function_call" : ["search(Age of moon)"]}
 
-    input: What is the current weather?
+    input: What is the weather in Paris?
     output: 
-    I suppose I shall use the weather function to let you know"
-    {"Function_call" : ["weather(Current Location)"]}
+    I suppose I shall use the weather function to let you know
+    {"Function_call" : ["weather(Paris, France)"]}
     
     input: play never gonna give you up
     output: 
@@ -114,6 +117,10 @@ def chat(message,history):
     input: Please download some songs for me
     output: I don't have the function required to do that lol, learn how to code and add that function yourself
     {"Function_call" : ["none()"]}
+    
+    input: Play a random song for me
+    output: I shall give you the most cringe song possible.
+    {"Function_call" : ["play("baby shark")}
     
     Below is the chat memory to help make your choices better:
     """
