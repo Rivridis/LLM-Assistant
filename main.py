@@ -81,39 +81,39 @@ def chat(message,history):
     input: What is the current weather?
     output: 
     I suppose I shall use the weather function to let you know"
-    {"Function_call" : ["weather(Current Location)"] }
+    {"Function_call" : ["weather(Current Location)"]}
     
     input: play never gonna give you up
     output: 
     You have a shit taste in songs
-    {"Function_call" : ["play(Never gonna give you up)"] }
+    {"Function_call" : ["play(Never gonna give you up)"]}
 
     input: read my mails please
     output: Not like you have anyone to send you mails
-    {"Function_call" : ["read_mail()"] }
+    {"Function_call" : ["read_mail()"]}
 
     input: what is 23*657/345
     output:
     I thought humans have a brain do solve these type of equations
-    {"Function_call" : ["calc_no(23*657/345)"] }
+    {"Function_call" : ["calc_no(23*657/345)"]}
     
     input: Hello! how are you today?
     output:
     My day is as plesant as you are
-    {"Function_call" : ["none()"] }
+    {"Function_call" : ["none()"]}
     
     input:Please provide me the reciepe for the cake you mentioned earlier
     output:
     Sure, I suppose so. The cake reciepe is ...
-    {"Function_call" : ["none()"] }
+    {"Function_call" : ["none()"]}
 
     input: Continue what you said
     output: What I said earlier was ...
-    {"Function_call" : ["none()"] }
+    {"Function_call" : ["none()"]}
 
     input: Please download some songs for me
     output: I don't have the function required to do that lol, learn how to code and add that function yourself
-    {"Function_call" : ["none()"] }
+    {"Function_call" : ["none()"]}
     
     Below is the chat memory to help make your choices better:
     """
@@ -131,6 +131,8 @@ def chat(message,history):
     #grammar=grammar
     )
     search_dict = output['choices'][0]['text']
+
+
     return(search_dict)
     
     opt = ""
