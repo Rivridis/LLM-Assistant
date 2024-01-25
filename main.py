@@ -119,7 +119,7 @@ def chat(message,history):
     {"Function_call" : ["none()"]}
     
     input: Play a random song for me
-    output: I shall give you the most cringe song possible.
+    output: I shall give you the most random and cringe song possible. Introducing, Baby shark by cocomelon!!
     {"Function_call" : ["play("baby shark")}
     
     Below is the chat memory to help make your choices better:
