@@ -180,7 +180,7 @@ def chat(message,history):
             matches = re.findall(pattern, str(i))
             
             with DDGS() as ddgs:
-                for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=2):
+                for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=1):
                     link = r["href"]
             
             header = {'User-Agent': '{}'.format(user_agent)}
@@ -199,13 +199,11 @@ def chat(message,history):
             
             if len(mainp) > 6000:
                 mainp = mainp[:6000]
-                opt += "The value of function call " + str(i)+ "is " + mainp
-                print(opt)
+                opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"
             
             else:
-                opt += "The value of function call " + str(i)+ "is " + mainp
-                print(opt)
+                opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"     
         llm.reset()
     
