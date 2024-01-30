@@ -7,6 +7,7 @@ from duckduckgo_search import DDGS
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 import gradio as gr
+import time
 
 # Random User Agent
 software_names = [SoftwareName.CHROME.value]
@@ -47,7 +48,7 @@ def chat(message,history):
     system1 = """
     You are an AI Assistant named Ailene, who responds to the user in a sarcastic and deadpan tone. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query
     
-    Current Values
+    Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Rickroll - never gonna give you up"
     Current Date : "25-01-2024"
     Current Time : "5:03 PM"
@@ -55,13 +56,13 @@ def chat(message,history):
 
     Functions
     def search(query)
-    '''Takes in a query string and returns search result. This function is only used when the user specifies the word search'''
+    '''Takes in a query string and returns search result. This function is only used when the user specifies the word search or google'''
     
     def weather(location)
-    '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations'''
+    '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg.'''
 
     def play(music_name)
-    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists.'''
+    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. eg, play(Nights - Avicii).'''
 
     def pause()
     '''Pauses any music playing in system'''
@@ -120,7 +121,12 @@ def chat(message,history):
     
     input: Play a random song for me
     output: I shall give you the most random and cringe song possible. Introducing, Baby shark by cocomelon!!
-    {"Function_call" : ["play("baby shark")}
+    {"Function_call" : ["play(baby shark)"}
+
+    You can use multiple functions as shown below:
+    input: Search for good fruits to eat and what is 34*9?
+    output: You want me to search for something you wont eat? sure ig, And seems I have to calculate this for your tiny brain too.
+    {"Function_call" : ["search(good fruits to eat)","calc_no(34*9)"}
     
     Below is the chat memory to help make your choices better:
     """
@@ -137,69 +143,38 @@ def chat(message,history):
     echo=False,
     #grammar=grammar
     )
-    search_dict = output['choices'][0]['text']
 
+    def slice(inputs):
+        op = inputs.find('{')
+        cl = inputs.find('}')
 
-    return(search_dict)
+        sliced = inputs[op:cl+1]
+        if op == -1 or cl == -1:
+            return("Invalid Call")
+        else:
+            return(sliced)
+    
+    llm_out = output['choices'][0]['text']
+    search_dict = eval(slice(llm_out))
+    search_list = search_dict["Function_call"]
     
     opt = ""
     
-    for i in search_list:
-        # Normal Chatting
-        if "chat" in i:
-            system2 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, and have a nice friendly chat with them. You are provided with a summarized chat history, which you can use to refer back to conversations.
-            """
-            pattern = r"\(([^)]+)\)"
-            matches = re.findall(pattern, str(i))
-            output = llm(
-            "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2+chat_memory,matches),
-            max_tokens=-1,
-            stop=["<|im_start|>","<|im_end|>"],
-            temperature=0.8,
-            top_k=40,
-            repeat_penalty=1.1,
-            min_p=0.05,
-            top_p=0.95,
-            echo=False
-            )
-            chat_memory+="user: {}\nassistant: {}\n".format(prompt,output['choices'][0]['text'])
-            
-            # Chat History Summarising
-            if len(chat_memory) > 6000:
-                system3 = """You are an AI that summarises the given chat history to the least words possible, while extracting and preserving key information.
-                """
-                output = llm(
-                "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system3,chat_memory),
-                max_tokens=-1,
-                stop=["<|im_start|>","<|im_end|>"],
-                temperature=0.8,
-                top_k=40,
-                repeat_penalty=1.1,
-                min_p=0.05,
-                top_p=0.95,
-                echo=False
-                )
-                chat_memory = output['choices'][0]['text']
-            
-            opt += output['choices'][0]['text']
-            opt += "\n"
-
+    for i in search_list:     
         # Number Calculation
-        elif "calc_no" in i:
+        if "calc_no" in i:
             pattern = r'\(([^)]+)\)'
             match = re.search(pattern, str(i))
             if match:
                 numeric_equation = str(match.group(1))
-                opt += "The answer is " + str(eval(numeric_equation))
+                opt += "The value of the function call " + str(i) + " is " + str(eval(numeric_equation))
+                print(opt)
                 opt += "\n"
 
         # Internet Search
-        elif "google" in i:
-            system4 = """You are an AI chat assistant named Luna, trained to help the user with any of their questions, having connection to the internet. You are provided with the search result of the google search of user's query below. Use the information to formulate the best response to the user's query. Go through the paragraphs carefully.
-            """
+        elif "search" in i:
             link = ""
-            mainp = ''
-            pro = "Please give me an accurate answer using the google search result"
+            mainp = ""
             
             pattern = r"\(([^)]+)\)"
             matches = re.findall(pattern, str(i))
@@ -224,29 +199,17 @@ def chat(message,history):
             
             if len(mainp) > 6000:
                 mainp = mainp[:6000]
-                system4+= mainp
+                opt += "The value of function call " + str(i)+ "is " + mainp
+                print(opt)
+                opt += "\n"
             
             else:
-                system4 += mainp
-            
-            output = llm(
-            "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system4,pro),
-            max_tokens=-1,
-            stop=["<|im_start|>","<|im_end|>"],
-            temperature=0.8,
-            top_k=40,
-            repeat_penalty=1.1,
-            min_p=0.05,
-            top_p=0.95,
-            echo=False
-            )
-            chat_memory+="user: {}\nassistant: {}\n".format(prompt,output['choices'][0]['text'])
-            opt += output['choices'][0]['text']
-            opt += "\n"
-                
+                opt += "The value of function call " + str(i)+ "is " + mainp
+                print(opt)
+                opt += "\n"     
         llm.reset()
     
-    return opt
+    return llm_out + "\n" + opt
 
 # Main Code
 gr.ChatInterface(chat,
