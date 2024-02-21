@@ -125,7 +125,7 @@ def chat(message,history):
     Sure! Songs are a great way to relax. Playing some nice relaxing lofi music.
     {"Function_call" : ["play(Lofi music)"]}
 
-    You can use multiple functions as shown below:
+    Merge all multiple functions in form of a list
     input: Search for good fruits to eat and what is 34*9?
     output: 
     Looks like I need to call multiple functions, here are the results for your queries about good fruits to eat, and your calculation result.
@@ -177,7 +177,6 @@ def chat(message,history):
             if match:
                 numeric_equation = str(match.group(1))
                 opt += "The value of the function call " + str(i) + " is " + str(eval(numeric_equation))
-                print(opt)
                 opt += "\n"
 
         # Internet Search
