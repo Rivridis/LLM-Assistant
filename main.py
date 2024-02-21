@@ -7,7 +7,6 @@ from duckduckgo_search import DDGS
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 import gradio as gr
-import time
 
 # Random User Agent
 software_names = [SoftwareName.CHROME.value]
@@ -31,7 +30,7 @@ user_agent = user_agent_rotator.get_random_user_agent()
 
 # LLM Settings
 llm = Llama(
-  model_path=r"B:\AI\Mistral\TheBloke\NeuralHermes-2.5-Mistral-7B-GGUF\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", 
+  model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", 
   n_ctx=2048,  
   n_threads=4,            
   n_gpu_layers=30,
@@ -46,7 +45,7 @@ def chat(message,history):
     # Tool Calling
     global chat_memory
     system1 = """
-    You are an AI Assistant named Microsoft Clippy, who responds to the user in a with helpful information, tips, and jokes just like Clippy. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query
+    You are an AI Assistant named Microsoft Clippy, who responds to the user in a with helpful information, tips, and jokes just like Clippy. You must be answer all the questions truthfully. Do not ask the user questions, and just do what you are told. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
@@ -79,12 +78,12 @@ def chat(message,history):
     Examples
     input: Search how old is the moon
     output: 
-    I shall search for it and let you know. Did you know that the full moon is considered lucky in some places?
+    I shall search for it and let you know. Fun fact, the full moon is considered lucky in some places.
     {"Function_call" : ["search(Age of moon)"]}
 
     input: What is the weather in Paris?
     output: 
-    I shall use the weather function to let you know. Do you want to visit Paris?
+    I shall use the weather function to let you know.
     {"Function_call" : ["weather(Paris, France)"]}
     
     input: play never gonna give you up
@@ -106,27 +105,31 @@ def chat(message,history):
     Hey! I am Clippy. I am always here to help you.
     {"Function_call" : ["none()"]}
     
-    input:Please provide me the reciepe for the cake you mentioned earlier
+    input:Please provide me the recipe for the cake you mentioned earlier
     output:
     Sure, I suppose so. The cake recipe is ...
     {"Function_call" : ["none()"]}
 
     input: Continue what you said
-    output: What I said earlier was ...
+    output: 
+    What I said earlier was ...
     {"Function_call" : ["none()"]}
 
     input: Please download some songs for me
-    output: I don't have the function required to do that currently.
+    output: 
+    I don't have the function required to do that currently.
     {"Function_call" : ["none()"]}
     
     input: Play a random song for me
-    output: Sure! Songs are a great way to relax. Playing a nice relaxing lofi music.
-    {"Function_call" : ["play(Lofi music)"}
+    output: 
+    Sure! Songs are a great way to relax. Playing some nice relaxing lofi music.
+    {"Function_call" : ["play(Lofi music)"]}
 
     You can use multiple functions as shown below:
     input: Search for good fruits to eat and what is 34*9?
-    output: Looks like I need to call multiple functions, here are the results for your queries about good fruits to eat, and your calculation result. Feel free to ask for more!
-    {"Function_call" : ["search(good fruits to eat)","calc_no(34*9)"}
+    output: 
+    Looks like I need to call multiple functions, here are the results for your queries about good fruits to eat, and your calculation result.
+    {"Function_call" : ["search(good fruits to eat)","calc_no(34*9)"]}
     
     Below is the chat memory to help make your choices better:
     """
@@ -156,9 +159,13 @@ def chat(message,history):
             return(sliced)
     
     llm_out = output['choices'][0]['text']
+    print(llm_out)
     chat_memory+="assistant {}\n".format(prompt)
-    search_dict = eval(slice(llm_out))
-    search_list = search_dict["Function_call"]
+    if slice(llm_out) != "Invalid Call":
+        search_dict = eval(slice(llm_out))
+        search_list = search_dict["Function_call"]
+    else:
+        return "LLM Error"
     
     opt = ""
     
