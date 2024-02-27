@@ -26,8 +26,8 @@ LLM-Assistant is a browser interface based on Gradio that interfaces with local 
 4. Run main.py
 
 ### Usage
-Use Assistant mode for general chat, and calling functions to execute like playing music.<br>
-Use Realtime mode for editing a word document or replying to an email in realtime, directly by copying a selection and waiting for the output.
+* Use Assistant mode for general chat, and calling functions to execute like playing music.
+* Use Realtime mode for editing a word document or replying to an email in realtime, directly by copying a selection and waiting for the output.
 The output gets auto pasted at cursor location.
 
 ## Images
