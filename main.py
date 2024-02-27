@@ -147,7 +147,7 @@ def chat(message,history):
     echo=False,
     #grammar=grammar
     )
-
+    #inputs
     def slice(inputs):
         op = inputs.find('{')
         cl = inputs.find('}')
