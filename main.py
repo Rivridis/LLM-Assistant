@@ -68,7 +68,7 @@ def chat(message,history):
 
     def read_mail()
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
-
+    
     def calc_no(query)
     '''Takes a equation of numbers as string, and returns solved answer'''
 
@@ -92,7 +92,7 @@ def chat(message,history):
     {"Function_call" : ["play(Never gonna give you up)"]}
 
     input: read my mails please
-    output: Reading your mails! I can also compose a mail for you if you want.
+    output: Reading your mails! I can also write a mail for you if you want.
     {"Function_call" : ["read_mail()"]}
 
     input: what is 23*657/345
@@ -123,7 +123,7 @@ def chat(message,history):
     input: Play a random song for me
     output: 
     Sure! Songs are a great way to relax. Playing some nice relaxing lofi music.
-    {"Function_call" : ["play(Lofi music)"]}
+    {"Function_call" : ["play(Lofi music)"]
 
     Merge all multiple functions in form of a list
     input: Search for good fruits to eat and what is 34*9?
@@ -213,6 +213,7 @@ def chat(message,history):
             else:
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"     
+
         llm.reset()
     
     parts = llm_out.split('{', 1)
@@ -223,13 +224,55 @@ def chat(message,history):
     
     return text + "\n" + opt
 
+def realtime():
+    import pyperclip as pc
+    import pyautogui
+
+    while True:
+        compt = """You are an AI model who can read user's text. You have to help them write their messages, expand upon it, explain it or summarize it according to what the user wants. The user will mention what they want to do with the text before giving the input. If the user does not give the usage, make your guess depending on the content of the text, such as a email reply or content explanation. Commands are prefaced with a #.
+        Example:
+        #Rewrite this text
+        #Reply to this email
+        """
+        prompt = pc.waitForNewPaste()
+        output = llm(
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(compt,prompt),
+        max_tokens=-1,
+        stop=["<|im_start|>","<|im_end|>"],
+        temperature=0.8,
+        top_k=40,
+        repeat_penalty=1.1,
+        min_p=0.05,
+        top_p=0.95,
+        echo=False,
+        #grammar=grammar
+        )
+        llm_out = output['choices'][0]['text']
+        pc.copy(llm_out)
+        
+        with pyautogui.hold('ctrl'):
+            pyautogui.press(['v'])
+        
+        llm.reset()
+        yield pc.paste()
+
+
 # Main Code
-gr.ChatInterface(chat,
+c1 = gr.ChatInterface(chat,
     chatbot=gr.Chatbot(height=400),
     textbox=gr.Textbox(placeholder="Enter Question", container=False, scale=7),
     title="AI Assistant",
     theme="soft",
     examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
-    clear_btn="Clear",).launch()
+    clear_btn="Clear",)
+
+with gr.Blocks() as c2:
+    output = gr.Textbox(label="Output Box",)
+    theme="soft"
+    start = gr.Button("Start")
+    start.click(fn=realtime, inputs=None, outputs=output, api_name="realtime")
+
+demo = gr.TabbedInterface([c1, c2], ["Assistant Mode", "Realtime Mode"])
+demo.launch()
 
 # Fix search function, as its not working for some pages
