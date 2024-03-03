@@ -92,11 +92,12 @@ def chat(message,history):
 
     Input: I am in the mood for some Pop
     Output:
-    {"assistant_reply":"Great choice! Here are a few popular pop songs you might enjoy:
-    Shape of You by Ed Sheeran
-    Blinding Lights by The Weeknd
-    Happier by Marshmello ft. Bastille
-    Stitches by Shawn Mendes. Let me know if you would like me to play any of these songs!,"function_called":["none()"]}
+    {"assistant_reply":"Great choice! Here are a few popular pop songs you might enjoy\n
+    1. Shape of You by Ed Sheeran\n
+    2. Blinding Lights by The Weeknd\n
+    3. Happier by Marshmello ft. Bastille\n
+    4. Stitches by Shawn Mendes.\n
+    Let me know if you would like me to play any of these songs!,"function_called":["none()"]}
 
     Input: Please play shape of you
     Output:
@@ -125,6 +126,7 @@ def chat(message,history):
     chat_memory+="assistant {}\n".format(prompt)
 
     search_dict = eval(llm_out)
+    print(search_dict)
     search_list = search_dict["function_called"]
 
     
