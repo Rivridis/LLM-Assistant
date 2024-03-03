@@ -14,19 +14,21 @@ operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
 user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 user_agent = user_agent_rotator.get_random_user_agent()
 
-# GBNF Grammar
-# grmtxt = r'''
-# root ::= answer
-# answer ::= "{"   ws   "\"thought\":"   ws   string   ","   ws   "\"tool\":"   ws   stringlist   "}"
-# answerlist ::= "[]" | "["   ws   answer   (","   ws   answer)*   "]"
-# string ::= "\""   ([^"]*)   "\""
-# boolean ::= "true" | "false"
-# ws ::= [ \t\n]*
-# number ::= [0-9]+   "."?   [0-9]*
-# stringlist ::= "["   ws   "]" | "["   ws   string   (","   ws   string)*   ws   "]"
-# numberlist ::= "["   ws   "]" | "["   ws   string   (","   ws   number)*   ws   "]"
-# '''
-#grammar = LlamaGrammar.from_string(grmtxt)
+#GBNF Grammar
+grmtxt = r'''
+root ::= output
+output ::= "{" ws "\"assistant_reply\":" ws string "," ws "\"function_called\":" ws functionvalueslist "}"
+outputlist ::= "[]" | "[" ws output ("," ws output)* "]"
+functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"none()\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\"" | "\"" "calc_no" "(" functionparameter ")" "\""
+functionvalueslist ::= "[" ws functionvalues ("," ws functionvalues)* ws "]"
+functionparameter ::= ([^"]*)
+string ::= "\"" ([^"]*) "\""
+boolean ::= "true" | "false"
+ws ::= [ \t\n]*
+number ::= [0-9]+  "."?  [0-9]*
+stringlist ::= "[" ws "]" | "[" ws string ("," ws string)* ws "]"
+'''
+grammar = LlamaGrammar.from_string(grmtxt)
 
 # LLM Settings
 llm = Llama(
@@ -45,7 +47,7 @@ def chat(message,history):
     # Tool Calling
     global chat_memory
     system1 = """
-    You are an AI Assistant named Microsoft Clippy, who responds to the user in a with helpful information, tips, and jokes just like Clippy. You must be answer all the questions truthfully. Do not ask the user questions, and just do what you are told. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query
+    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function, and use none() when function call is not needed. Make sure to call functions when necessary, according to the given context in the question.
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
@@ -55,10 +57,10 @@ def chat(message,history):
 
     Functions
     def search(query)
-    '''Takes in a query string and returns search result. This function is only used when the user specifies the word search or google'''
+    '''Takes in a query string and returns search result. Use this function, when a user's query needs some information from the internet. Feel free to use it whenever you feel like it.'''
     
     def weather(location)
-    '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg.'''
+    '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg. This function is used for retrieving weather data, temperature, pressure etc when the user asks for it.''
 
     def play(music_name)
     '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. eg, play(Nights - Avicii). Always reccomend the user a song, and don't give a general name'''
@@ -70,67 +72,36 @@ def chat(message,history):
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
     
     def calc_no(query)
-    '''Takes a equation of numbers as string, and returns solved answer'''
+    '''Takes a equation of numbers and returns solved answer'''
 
     def none()
     '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. This function can be also used when the user asks to do something that does not have a function yet'''
 
-    Examples
-    input: Search how old is the moon
-    output: 
-    I shall search for it and let you know. Fun fact, the full moon is considered lucky in some places.
-    {"Function_call" : ["search(Age of moon)"]}
+    Output Format - Single Function
+    Output:
+    {"assistant_reply":"insert lengthy assistant reply here","function_called":["function_name(parameter)"]}
 
-    input: What is the weather in Paris?
-    output: 
-    I shall use the weather function to let you know.
-    {"Function_call" : ["weather(Paris, France)"]}
-    
-    input: play never gonna give you up
-    output: 
-    Playing the song. Feel free to let me know if you want to change it.
-    {"Function_call" : ["play(Never gonna give you up)"]}
+    Output Format - Multiple Function
+    Output:
+    {"assistant_reply":"insert lengthy assistant reply here","function_called":["function_name_1(parameter)","function_name_2(parameter)"]}
 
-    input: read my mails please
-    output: Reading your mails! I can also write a mail for you if you want.
-    {"Function_call" : ["read_mail()"]}
+    Example - Multi Turn Conversation. Follow this format for any function call.
+    Input: hello there! Can you play me some music?
+    Output:
+    {"assistant_reply":"Hello! I'm Vivy, your personal AI assistant. I'd love to play some music for you. What genre or mood are you in the mood for?","function_called":["none()"]}
 
-    input: what is 23*657/345
-    output:
-    Looks like you are calculating an equation. Here is the result
-    {"Function_call" : ["calc_no(23*657/345)"]}
-    
-    input: Hello! how are you today?
-    output:
-    Hey! I am Clippy. I am always here to help you.
-    {"Function_call" : ["none()"]}
-    
-    input:Please provide me the recipe for the cake you mentioned earlier
-    output:
-    Sure, I suppose so. The cake recipe is ...
-    {"Function_call" : ["none()"]}
+    Input: I am in the mood for some Pop
+    Output:
+    {"assistant_reply":"Great choice! Here are a few popular pop songs you might enjoy:
+    Shape of You by Ed Sheeran
+    Blinding Lights by The Weeknd
+    Happier by Marshmello ft. Bastille
+    Stitches by Shawn Mendes. Let me know if you would like me to play any of these songs!,"function_called":["none()"]}
 
-    input: Continue what you said
-    output: 
-    What I said earlier was ...
-    {"Function_call" : ["none()"]}
+    Input: Please play shape of you
+    Output:
+    {"assistant_reply":"Sure! You shall be able to hear that song right about now!","function_called":["play(Shape of you)"]}
 
-    input: Please download some songs for me
-    output: 
-    I don't have the function required to do that currently.
-    {"Function_call" : ["none()"]}
-    
-    input: Play a random song for me
-    output: 
-    Sure! Songs are a great way to relax. Playing some nice relaxing lofi music.
-    {"Function_call" : ["play(Lofi music)"]
-
-    Merge all multiple functions in form of a list
-    input: Search for good fruits to eat and what is 34*9?
-    output: 
-    Looks like I need to call multiple functions, here are the results for your queries about good fruits to eat, and your calculation result.
-    {"Function_call" : ["search(good fruits to eat)","calc_no(34*9)"]}
-    
     Below is the chat memory to help make your choices better:
     """
     prompt = message
@@ -145,38 +116,27 @@ def chat(message,history):
     min_p=0.05,
     top_p=0.95,
     echo=False,
-    #grammar=grammar
+    grammar=grammar
     )
     #inputs
-    def slice(inputs):
-        op = inputs.find('{')
-        cl = inputs.find('}')
 
-        sliced = inputs[op:cl+1]
-        if op == -1 or cl == -1:
-            return("Invalid Call")
-        else:
-            return(sliced)
     
     llm_out = output['choices'][0]['text']
     print(llm_out)
     chat_memory+="assistant {}\n".format(prompt)
-    if slice(llm_out) != "Invalid Call":
-        search_dict = eval(slice(llm_out))
-        search_list = search_dict["Function_call"]
-    else:
-        return "LLM Error"
+
+    search_dict = eval(llm_out)
+    search_list = search_dict["function_called"]
     
     opt = ""
     
     for i in search_list:     
         # Number Calculation
         if "calc_no" in i:
-            pattern = r'\(([^)]+)\)'
-            match = re.search(pattern, str(i))
-            if match:
-                numeric_equation = str(match.group(1))
-                opt += "The value of the function call " + str(i) + " is " + str(eval(numeric_equation))
+            result = re.search(r"'(\d+[\+\-\*\/]+\d+)'", str(i))
+            if result:
+                extracted_equation = result.group(1)
+                opt += "The value of the function call " + str(i) + " is " + eval(extracted_equation)
                 opt += "\n"
 
         # Internet Search
@@ -214,15 +174,10 @@ def chat(message,history):
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"     
 
-        llm.reset()
-    
-    parts = llm_out.split('{', 1)
-    text = parts[0].strip()
-
     if len(chat_memory) > 6000:
         chat_memory = chat_memory[:6000]
     
-    return text + "\n" + opt
+    return search_dict["assistant_reply"] + "\n" + opt
 
 def realtime():
     import pyperclip as pc
