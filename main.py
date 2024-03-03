@@ -122,11 +122,11 @@ def chat(message,history):
 
     
     llm_out = output['choices'][0]['text']
-    print(llm_out)
     chat_memory+="assistant {}\n".format(prompt)
 
     search_dict = eval(llm_out)
     search_list = search_dict["function_called"]
+
     
     opt = ""
     
