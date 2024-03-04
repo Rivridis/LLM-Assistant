@@ -219,17 +219,15 @@ c1 = gr.ChatInterface(chat,
     chatbot=gr.Chatbot(height=400),
     textbox=gr.Textbox(placeholder="Enter Question", container=False, scale=7),
     title="AI Assistant",
-    theme="soft",
     examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
     clear_btn="Clear",)
 
 with gr.Blocks() as c2:
-    output = gr.Textbox(label="Output Box",)
-    theme="soft"
+    output = gr.Textbox(label="Output Box")
     start = gr.Button("Start")
     start.click(fn=realtime, inputs=None, outputs=output, api_name="realtime")
 
-demo = gr.TabbedInterface([c1, c2], ["Assistant Mode", "Realtime Mode"])
+demo = gr.TabbedInterface([c1, c2], ["Assistant Mode", "Realtime Mode"],theme=gr.themes.Soft())
 demo.launch()
 
 # Fix search function, as its not working for some pages
