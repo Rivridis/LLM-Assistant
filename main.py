@@ -19,7 +19,7 @@ grmtxt = r'''
 root ::= output
 output ::= "{" ws "\"assistant_reply\":" ws string "," ws "\"function_called\":" ws functionvalueslist "}"
 outputlist ::= "[]" | "[" ws output ("," ws output)* "]"
-functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"none()\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\"" | "\"" "calc_no" "(" functionparameter ")" "\""
+functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"none()\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\""
 functionvalueslist ::= "[" ws functionvalues ("," ws functionvalues)* ws "]"
 functionparameter ::= ([^"]*)
 string ::= "\"" ([^"]*) "\""
@@ -70,9 +70,6 @@ def chat(message,history):
 
     def read_mail()
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
-    
-    def calc_no(query)
-    '''Takes a equation of numbers and returns solved answer'''
 
     def none()
     '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. This function can be also used when the user asks to do something that does not have a function yet'''
@@ -133,16 +130,8 @@ def chat(message,history):
     opt = ""
     
     for i in search_list:     
-        # Number Calculation
-        if "calc_no" in i:
-            result = re.search(r"'(\d+[\+\-\*\/]+\d+)'", str(i))
-            if result:
-                extracted_equation = result.group(1)
-                opt += "The value of the function call " + str(i) + " is " + str(eval(extracted_equation))
-                opt += "\n"
-
         # Internet Search
-        elif "search" in i:
+        if "search" in i:
             link = ""
             mainp = ""
             
