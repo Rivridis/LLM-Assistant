@@ -103,7 +103,7 @@ def chat(message,history):
     Output:
     {"assistant_reply":"Sure! You shall be able to hear that song right about now!","function_called":["play(Shape of you)"]}
 
-    Below is the chat memory to help make your choices better:
+    You have been given the transcript of the previous conversations below, so that you can refer back to what the user said earlier. Use this transcript to formulate the best response using context clues
     """
     prompt = message
     chat_memory+="user {}\n".format(prompt)
