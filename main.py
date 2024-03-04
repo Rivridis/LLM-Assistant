@@ -123,7 +123,7 @@ def chat(message,history):
 
     
     llm_out = output['choices'][0]['text']
-    chat_memory+="assistant {}\n".format(prompt)
+    chat_memory+="assistant {}\n".format(str(llm_out))
 
     search_dict = eval(llm_out)
     print(search_dict)
@@ -138,7 +138,7 @@ def chat(message,history):
             result = re.search(r"'(\d+[\+\-\*\/]+\d+)'", str(i))
             if result:
                 extracted_equation = result.group(1)
-                opt += "The value of the function call " + str(i) + " is " + eval(extracted_equation)
+                opt += "The value of the function call " + str(i) + " is " + str(eval(extracted_equation))
                 opt += "\n"
 
         # Internet Search
