@@ -47,7 +47,7 @@ def chat(message,history):
     # Tool Calling
     global chat_memory
     system1 = """
-    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function, and use none() when function call is not needed. Make sure to call functions when necessary, according to the given context in the question. You will only get the function output after calling it, which you will do after your reply.
+    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function, and use none() when function call is not needed. Make sure to call functions when necessary, according to the given context in the question. You will only get the function output after calling it, which you will do after your reply. Ask the user for more details if necessary.
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
@@ -163,12 +163,43 @@ def chat(message,history):
             
             else:
                 opt += "The value of function call " + str(i)+ " is " + mainp
-                opt += "\n"     
+                opt += "\n" 
+        else:
+                opt += "NONE"
 
+    if opt != "NONE":
+        system2 = """
+        You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. Assume the user can't see the previous response, so modify the previous response now that you have the function call value.
+        """
+        
+        userv = """
+        User Input {}
+        Prev Response {}
+        Function Call Value {}
+        """.format(prompt,llm_out,opt)
+        
+        chat_memory+="user {}\n".format(prompt)
+        
+        output2 = llm(
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2,userv),
+        max_tokens=-1,
+        stop=["<|im_start|>","<|im_end|>"],
+        temperature=0.8,
+        top_k=40,
+        repeat_penalty=1.1,
+        min_p=0.05,
+        top_p=0.95,
+        echo=False,
+        )
+        llm_out2 = output2['choices'][0]['text']
+    
     if len(chat_memory) > 6000:
         chat_memory = chat_memory[:6000]
     
-    return search_dict["assistant_reply"] + "\n" + opt
+    if 'llm_out2' in locals():
+        return search_dict["assistant_reply"] + "\n" + str(llm_out2)
+    else:
+        return search_dict["assistant_reply"] + "\n"
 
 def realtime():
     import pyperclip as pc
