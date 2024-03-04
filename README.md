@@ -5,18 +5,21 @@ LLM-Assistant is a browser interface based on Gradio that interfaces with local 
 * Works with any instruct-finetuned LLM
 * Can search for information (RAG)
 * Knows when to call functions
-* Added Realtime mode for working across the system
+* Realtime mode for working across the system
 
 ## Upcoming Features
-* Vector Database
-* Function execution support
-* Error handling
-* GBNF Grammar output structure
+* Vector database
+* File upload
+* Voice access
 
 ## Current Bugs
 * Search feature might crash at times
-* No error handling, causing the code to crash when LLM produces unparsable output
-* No stop button for Realtime mode
+* No stop button for realtime mode
+
+## Changelog
+* Added grammar and error handling support
+* Added function execution based reply
+* Removed calc_no function
 
 ## Setup
 ### Setup on Windows 10/11
