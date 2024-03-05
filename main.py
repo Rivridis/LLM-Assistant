@@ -103,7 +103,6 @@ def chat(message,history):
     You have been given the transcript of the previous conversations below, so that you can refer back to what the user said earlier. Use this transcript to formulate the best response using context clues
     """
     prompt = message
-    chat_memory+="user {}\n".format(prompt)
     output = llm(
     "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system1+chat_memory,prompt),
     max_tokens=-1,
@@ -120,6 +119,7 @@ def chat(message,history):
 
     
     llm_out = output['choices'][0]['text']
+    chat_memory+="user {}\n".format(prompt)
     chat_memory+="assistant {}\n".format(str(llm_out))
 
     search_dict = eval(llm_out)
@@ -178,8 +178,6 @@ def chat(message,history):
         Function Call Value {}
         """.format(prompt,llm_out,opt)
         
-        chat_memory+="user {}\n".format(prompt)
-        
         output2 = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2,userv),
         max_tokens=-1,
@@ -192,6 +190,7 @@ def chat(message,history):
         echo=False,
         )
         llm_out2 = output2['choices'][0]['text']
+        chat_memory+="{}\n".format(str(llm_out2))
     
     if len(chat_memory) > 6000:
         chat_memory = chat_memory[:6000]
