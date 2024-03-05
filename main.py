@@ -57,7 +57,7 @@ def chat(message,history):
 
     Functions
     def search(query)
-    '''Takes in a query string and returns search result. Whenever the user asks a question that needs information about dates or facts, use this function. This can range from birthdays, facts that need to be correct, or festivals. Use this function when a question's answer requires updated/real-time information too. This function is used as a google search function.
+    '''Takes in a query string and returns search result. Whenever the user asks a question that needs information about dates or facts, use this function. This can range from birthdays, facts that need to be correct, or festivals. Use this function when a question's answer requires updated/real-time information too. This function is used as a google search function. Make sure to fact check your replies using this function.
     Example: search(when was Nehru born)
     '''
     
