@@ -19,10 +19,10 @@ grmtxt = r'''
 root ::= output
 output ::= "{" ws "\"assistant_reply\":" ws string "," ws "\"function_called\":" ws functionvalueslist "}"
 outputlist ::= "[]" | "[" ws output ("," ws output)* "]"
-functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"none()\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\""
+functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\"" | "\"none()\"" 
 functionvalueslist ::= "[" ws functionvalues ("," ws functionvalues)* ws "]"
 functionparameter ::= ([^"]*)
-string ::= "\"" ([^"]*) "\""
+string ::= "\"" ([^":]*) "\""
 boolean ::= "true" | "false"
 ws ::= [ \t\n]*
 number ::= [0-9]+  "."?  [0-9]*
@@ -47,7 +47,7 @@ def chat(message,history):
     # Tool Calling
     global chat_memory
     system1 = """
-    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function, and use none() when function call is not needed. Make sure to call functions when necessary, according to the given context in the question. You will only get the function output after calling it, which you will do after your reply. Ask the user for more details if necessary.
+    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function. Make sure to call functions when necessary, according to the given context in the question. You will only get the function output after calling it, which you will do after your reply. Ask the user for more details if necessary.
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
@@ -57,7 +57,9 @@ def chat(message,history):
 
     Functions
     def search(query)
-    '''Takes in a query string and returns search result. Use this function, when a user's query needs some information from the internet. Feel free to use it when you need to provide answer to the user, that requires fact checking, such as dates, important facts, etc.'''
+    '''Takes in a query string and returns search result. Whenever the user asks a question that needs information about dates or facts, use this function. This can range from birthdays, facts that need to be correct, or festivals. Use this function when a question's answer requires updated/real-time information too. This function is used as a google search function.
+    Example: search(when was Nehru born)
+    '''
     
     def weather(location)
     '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg. This function is used for retrieving weather data, temperature, pressure etc when the user asks for it.''
@@ -72,7 +74,7 @@ def chat(message,history):
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
 
     def none()
-    '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. This function can be also used when the user asks to do something that does not have a function yet'''
+    '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations.'''
 
     Output Format - Single Function
     Output:
@@ -157,7 +159,7 @@ def chat(message,history):
                 mainp += code_block.get_text()
             
             if len(mainp) > 6000:
-                mainp = mainp[:6000]
+                mainp = mainp[:5500]
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"
             
@@ -196,9 +198,9 @@ def chat(message,history):
         chat_memory = chat_memory[:6000]
     
     if 'llm_out2' in locals():
-        return search_dict["assistant_reply"] + "\n" + str(llm_out2)
+        return str(search_dict["assistant_reply"]) + "\n" + str(llm_out2)
     else:
-        return search_dict["assistant_reply"] + "\n"
+        return str(search_dict["assistant_reply"]) + "\n"
 
 def realtime():
     import pyperclip as pc
