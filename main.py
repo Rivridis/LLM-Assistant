@@ -74,7 +74,7 @@ def chat(message,history):
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
 
     def none()
-    '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. Encourage the user to use the search function if they ask any question that needs factual information.'''
+    '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. Encourage the user to ask you for searched information if they ask any question that needs factual information.'''
 
     Output Format - Single Function
     Output:
