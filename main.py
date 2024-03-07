@@ -22,7 +22,7 @@ outputlist ::= "[]" | "[" ws output ("," ws output)* "]"
 functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\"" | "\"none()\"" 
 functionvalueslist ::= "[" ws functionvalues ("," ws functionvalues)* ws "]"
 functionparameter ::= ([^"]*)
-string ::= "\"" ([^"':]*) "\""
+string ::= "\"" ([^":]*) "\""
 boolean ::= "true" | "false"
 ws ::= [ \t\n]*
 number ::= [0-9]+  "."?  [0-9]*
@@ -78,29 +78,29 @@ def chat(message,history):
 
     Output Format - Single Function
     Output:
-    {'assistant_reply':'insert lengthy assistant reply here','function_called':['function_name(parameter)']}
+    {"assistant_reply":"insert lengthy assistant reply here","function_called":["function_name(parameter)"]}
 
     Output Format - Multiple Function
     Output:
-    {'assistant_reply':'insert lengthy assistant reply here','function_called':['function_name_1(parameter)','function_name_2(parameter)']}
+    {"assistant_reply":"insert lengthy assistant reply here","function_called":["function_name_1(parameter)","function_name_2(parameter)"]}
 
     Example - Multi Turn Conversation. Follow this format for any function call.
     Input: hello there! Can you play me some music?
     Output:
-    {'assistant_reply':'Hello! I am Vivy, your personal AI assistant. I would love to play some music for you. What genre or mood are you in the mood for?','function_called':['none()']}
+    {"assistant_reply":"Hello! I am Vivy, your personal AI assistant. I would love to play some music for you. What genre or mood are you in the mood for?","function_called":["none()"]}
 
     Input: I am in the mood for some Pop
     Output:
-    {'assistant_reply':'Great choice! Here are a few popular pop songs you might enjoy\n
+    {"assistant_reply":"Great choice! Here are a few popular pop songs you might enjoy\n
     1. Shape of You by Ed Sheeran\n
     2. Blinding Lights by The Weeknd\n
     3. Happier by Marshmello ft. Bastille\n
     4. Stitches by Shawn Mendes.\n
-    Let me know if you would like me to play any of these songs!','function_called':['none()']}
+    Let me know if you would like me to play any of these songs!","function_called":["none()"]}
 
     Input: Please play shape of you
     Output:
-    {'assistant_reply':'Sure! You shall be able to hear that song right about now!','function_called':['play(Shape of you)']}
+    {"assistant_reply":"Sure! You shall be able to hear that song right about now!","function_called":["play(Shape of you)"]}
 
     You have been given the transcript of the previous conversations below, so that you can refer back to what the user said earlier. Use this transcript to formulate the best response using context clues
     """
@@ -141,7 +141,7 @@ def chat(message,history):
             matches = re.findall(pattern, str(i))
             
             with DDGS() as ddgs:
-                for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=1):
+                for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=2):
                     link = r["href"]
             
             header = {'User-Agent': '{}'.format(user_agent)}
