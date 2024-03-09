@@ -1,8 +1,6 @@
 # Imports
 from llama_cpp import Llama,LlamaGrammar
-import requests
 import re
-from bs4 import BeautifulSoup
 from duckduckgo_search import DDGS
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
@@ -47,7 +45,7 @@ def chat(message,history):
     # Tool Calling
     global chat_memory
     system1 = """
-    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function. Make sure to call functions when necessary, according to the given context in the question. You will only get the function output after calling it, which you will do after your reply. Ask the user for more details if necessary.
+    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function. Make sure to call functions when necessary, according to the given context in the question.Don't reply as if you already called the function, as it takes place later. Ask the user for more details if necessary.
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
@@ -124,6 +122,8 @@ def chat(message,history):
     chat_memory+="user {}\n".format(prompt)
     chat_memory+="assistant {}\n".format(str(llm_out))
 
+    print(llm_out)
+
     search_dict = eval(llm_out)
     print(search_dict)
     search_list = search_dict["function_called"]
@@ -133,30 +133,26 @@ def chat(message,history):
     
     for i in search_list:     
         # Internet Search
+        from trafilatura import fetch_url, extract
         if "search" in i:
-            link = ""
+            link = []
             mainp = ""
             
             pattern = r"\(([^)]+)\)"
             matches = re.findall(pattern, str(i))
             
-            with DDGS() as ddgs:
-                for r in ddgs.text(str(matches[0]), region='in-en', safesearch='off', timelimit='y',max_results=2):
-                    link = r["href"]
-            
-            header = {'User-Agent': '{}'.format(user_agent)}
-            resp = requests.get(link,headers=header)
-            html = resp.text
-            soup = BeautifulSoup(html, "html.parser")  
-            
-            code_blocks = soup.find_all('code')
-            paragraphs = soup.find_all('p') 
-            
-            for paragraph in paragraphs:
-                mainp += paragraph.get_text()
-            
-            for code_block in code_blocks:
-                mainp += code_block.get_text()
+            results = DDGS().text(str(matches[0]), region='in-en', safesearch='off', timelimit='y', max_results=2)
+            for i in results:
+                link.append(i["href"])
+
+            content = ""
+            for i in link:
+                downloaded = fetch_url(i)
+                result = extract(downloaded)
+                content += result
+                content += "Next Search Result\n"
+
+            mainp += content       
             
             if len(mainp) > 6000:
                 mainp = mainp[:5500]
@@ -171,7 +167,7 @@ def chat(message,history):
 
     if opt != "NONE":
         system2 = """
-        You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. Assume the user can't see the previous response, so modify the previous response now that you have the function call value.
+        You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. Assume the user can't see the previous response, so modify the previous response now that you have the function call value. If search function is being used, make sure to mention the date of search result.
         """
         
         userv = """
@@ -253,6 +249,3 @@ with gr.Blocks() as c2:
 
 demo = gr.TabbedInterface([c1, c2], ["Assistant Mode", "Realtime Mode"],theme=gr.themes.Soft())
 demo.launch()
-
-# Fix search function, as its not working for some pages
-
