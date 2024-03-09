@@ -246,9 +246,13 @@ c1 = gr.ChatInterface(chat,
 with gr.Blocks() as c2:
     output = gr.Textbox(label="Output Box")
     start = gr.Button("Start")
-    start.click(fn=realtime, inputs=None, outputs=output, api_name="realtime")
+    stop = gr.Button("Stop_Next")
+    click_event = start.click(fn=realtime, inputs=None, outputs=output)
+    stop.click(fn=None, inputs=None, outputs=None, cancels=[click_event])
+    c2.queue(max_size=1)
 
 demo = gr.TabbedInterface([c1, c2], ["Assistant Mode", "Realtime Mode"],theme=gr.themes.Soft())
 demo.launch()
 
 # Fix search function, as its not working for some pages
+
