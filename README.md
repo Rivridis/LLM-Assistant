@@ -13,12 +13,13 @@ LLM-Assistant is a browser interface based on Gradio that interfaces with local 
 * Voice access
 
 ## Current Bugs
-* Search feature might crash at times
+* Rare crashes
 
 ## Changelog
 * Added grammar and error handling support
 * Added function execution based reply
 * Removed calc_no function
+* Fixed search feature
 
 ## Setup
 ### Setup on Windows 10/11
