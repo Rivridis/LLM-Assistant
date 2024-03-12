@@ -5,6 +5,7 @@ from duckduckgo_search import DDGS
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 import gradio as gr
+import json
 
 # Random User Agent
 software_names = [SoftwareName.CHROME.value]
@@ -17,10 +18,10 @@ grmtxt = r'''
 root ::= output
 output ::= "{" ws "\"assistant_reply\":" ws string "," ws "\"function_called\":" ws functionvalueslist "}"
 outputlist ::= "[]" | "[" ws output ("," ws output)* "]"
-functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\"" | "\"none()\"" 
+functionvalues ::=  "\"" "play" "(" functionparameter ")" "\"" | "\"" "search" "(" functionparameter ")" "\"" | "\"" "weather" "(" functionparameter ")" "\"" | "\"" "pause" "(" functionparameter ")" "\"" | "\"" "read_mail" "(" functionparameter ")" "\"" |"\"" "youtube" "(" functionparameter ")" "\"" | "\"none()\"" 
 functionvalueslist ::= "[" ws functionvalues ("," ws functionvalues)* ws "]"
 functionparameter ::= ([^"]*)
-string ::= "\"" ([^":]*) "\""
+string ::= "\"" ([^"]*) "\""
 boolean ::= "true" | "false"
 ws ::= [ \t\n]*
 number ::= [0-9]+  "."?  [0-9]*
@@ -70,6 +71,10 @@ def chat(message,history):
 
     def read_mail()
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
+
+    def youtube()
+    '''Takes query string as input, and returns 10 youtube videos on the query. Used for reccomending users videos or searching for videos to watch. Make sure to use this function whenever the user wants some youtube videos.
+    eg, youtube(cute cat videos)'''
 
     def none()
     '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. Encourage the user to ask you for searched information if they ask any question that needs factual information.'''
@@ -122,9 +127,7 @@ def chat(message,history):
     chat_memory+="user {}\n".format(prompt)
     chat_memory+="assistant {}\n".format(str(llm_out))
 
-    print(llm_out)
-
-    search_dict = eval(llm_out)
+    search_dict = json.loads(llm_out)
     print(search_dict)
     search_list = search_dict["function_called"]
 
@@ -141,7 +144,7 @@ def chat(message,history):
             pattern = r"\(([^)]+)\)"
             matches = re.findall(pattern, str(i))
             
-            results = DDGS().text(str(matches[0]), region='in-en', safesearch='off', timelimit='y', max_results=2)
+            results = DDGS().text(str(matches[0]), region='wt-wt', safesearch='off', timelimit='y', max_results=2)
             for i in results:
                 link.append(i["href"])
 
@@ -149,7 +152,7 @@ def chat(message,history):
             for i in link:
                 downloaded = fetch_url(i)
                 result = extract(downloaded)
-                content += result
+                content += str(result)
                 content += "Next Search Result\n"
 
             mainp += content       
@@ -162,12 +165,42 @@ def chat(message,history):
             else:
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n" 
+        
+        elif "youtube" in i:
+            pattern = r"\(([^)]+)\)"
+            matches = re.findall(pattern, str(i))
+
+            results = DDGS().videos(
+            keywords=str(matches[0]),
+            region="wt-wt",
+            safesearch="off",
+            timelimit="w",
+            resolution="high",
+            duration="medium",
+            max_results=5,
+            )
+            val = ""
+            for i in results:
+                val += str(i['content'])
+                val += '\n'
+                val += str(i['description'])
+                val += '\n'
+            opt += "The value of function call " + str(i)+ " is " + val
+            opt += "\n"
+            print(val)
+
         else:
                 opt += "NONE"
 
     if opt != "NONE":
         system2 = """
-        You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. Assume the user can't see the previous response, so modify the previous response now that you have the function call value. If search function is being used, make sure to mention the date of search result.
+        You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. The user can see your previous response too, so acknowledge it. If the previous response is wrong or irrelevant to the function call, let the user know. If search function is being used, make sure to mention the date of search result.
+
+        Output Format:
+        Assistant Response
+        Function Citation
+        Function Call Result Date - Date/Not Applicable
+        Function Call Sucessfull - Yes/No
         """
         
         userv = """
