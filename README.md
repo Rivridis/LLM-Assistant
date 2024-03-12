@@ -16,10 +16,10 @@ LLM-Assistant is a browser interface based on Gradio that interfaces with local 
 * Rare crashes
 
 ## Changelog
-* Added grammar and error handling support
 * Added function execution based reply
 * Removed calc_no function
 * Fixed search feature
+* Youtube video search
 
 ## Setup
 ### Setup on Windows 10/11
