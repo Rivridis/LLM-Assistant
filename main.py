@@ -267,7 +267,7 @@ def realtime():
 # Main Code
 c1 = gr.ChatInterface(chat,
     chatbot=gr.Chatbot(height=400),
-    textbox=gr.Textbox(placeholder="Enter Question", container=False, scale=7),
+    #textbox=gr.Textbox(placeholder="Enter Question", container=False, scale=7), gradio 3.50
     title="AI Assistant",
     examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
     clear_btn="Clear",)
