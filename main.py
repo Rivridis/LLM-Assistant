@@ -13,6 +13,7 @@ operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
 user_agent_rotator = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
 user_agent = user_agent_rotator.get_random_user_agent()
 
+
 #GBNF Grammar
 grmtxt = r'''
 root ::= output
@@ -40,9 +41,59 @@ llm = Llama(
 
 # Global Variables
 chat_memory = ""
-
+from pypdf import PdfReader
+import chromadb
+client = chromadb.Client()
+from pathlib import Path
 # Chat Function
-def chat(message,history):
+def chat(message,history,file_path):
+    if file_path != None:
+        file_name = Path(file_path).stem
+        fl = file_name.lower()
+        fl = fl.replace(" ", "_")
+        pglst = []
+        reader = PdfReader(str(file_path))
+        number_of_pages = len(reader.pages)
+        for i in range(0,number_of_pages):
+            page = reader.pages[i]
+            text = page.extract_text()
+            pglst.append(text)
+        collection = client.get_or_create_collection(name=str(fl))
+        collection.add(
+        documents=pglst,
+        ids=[f"{i}" for i in range(len(pglst))],)
+
+        prompt = message
+        results = collection.query(
+        query_texts=[prompt],
+        n_results=2,)
+        print(results)
+
+        systemRAG = """You are an AI Assistant named Vivy, who is trained for answering questions from a given PDF's context. You are provided with the context from the PDF as given below. Only use the given context to answer the user's question. If no context is given, or the user's question is not there in the given context, let the user know that their question can't be answered. Parse the given context, so it can be readable by the user, and explain the user's query using the context. Mention the page numbers in your response too.
+        Current Context:
+        {}
+        Page Numbers:
+        {}
+
+        Output Format:
+        Explanation of given context with Query
+        Page Numbers
+        """.format(str(results['documents']),str(results['ids']))
+
+        output = llm(
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(systemRAG,prompt),
+        max_tokens=-1,
+        stop=["<|im_start|>","<|im_end|>"],
+        temperature=0.8,
+        top_k=40,
+        repeat_penalty=1.1,
+        min_p=0.05,
+        top_p=0.95,
+        echo=False,
+        )
+        llm_out = output['choices'][0]['text']
+        return llm_out
+                
     # Tool Calling
     global chat_memory
     system1 = """
@@ -265,11 +316,15 @@ def realtime():
 
 
 # Main Code
-c1 = gr.ChatInterface(chat,
-    chatbot=gr.Chatbot(height=400),
+
+        
+with gr.Blocks() as c1:
+    file_up = gr.File(render=False,file_types= [".pdf"])
+    gr.ChatInterface(chat,
+    chatbot=gr.Chatbot(height=400,render=False),
     title="AI Assistant",
-    examples=["Good Morning!", "Google en passant", "what is 899*99/21"],
-    clear_btn="Clear",)
+    clear_btn="Clear",
+    additional_inputs=[file_up],)
 
 with gr.Blocks() as c2:
     output = gr.Textbox(label="Output Box")
