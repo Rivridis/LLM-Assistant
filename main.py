@@ -6,6 +6,12 @@ from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 import gradio as gr
 import json
+from pypdf import PdfReader
+import chromadb
+from pathlib import Path
+import pyperclip as pc
+import pyautogui
+
 
 # Random User Agent
 software_names = [SoftwareName.CHROME.value]
@@ -41,10 +47,8 @@ llm = Llama(
 
 # Global Variables
 chat_memory = ""
-from pypdf import PdfReader
-import chromadb
 client = chromadb.Client()
-from pathlib import Path
+
 # Chat Function
 def chat(message,history,file_path):
     if file_path != None:
@@ -171,9 +175,8 @@ def chat(message,history,file_path):
     echo=False,
     grammar=grammar
     )
-    #inputs
-
     
+    #Output
     llm_out = output['choices'][0]['text']
     chat_memory+="user {}\n".format(prompt)
     chat_memory+="assistant {}\n".format(str(llm_out))
@@ -283,9 +286,6 @@ def chat(message,history,file_path):
         return str(search_dict["assistant_reply"]) + "\n"
 
 def realtime():
-    import pyperclip as pc
-    import pyautogui
-
     while True:
         compt = """You are an AI model who can read user's text. You have to help them write their messages, expand upon it, explain it or summarize it according to what the user wants. The user will mention what they want to do with the text before giving the input. If the user does not give the usage, make your guess depending on the content of the text, such as a email reply or content explanation. Commands are prefaced with a #.
         Example:
@@ -303,7 +303,6 @@ def realtime():
         min_p=0.05,
         top_p=0.95,
         echo=False,
-        #grammar=grammar
         )
         llm_out = output['choices'][0]['text']
         pc.copy(llm_out)
@@ -315,9 +314,7 @@ def realtime():
         yield pc.paste()
 
 
-# Main Code
-
-        
+# Main Code    
 with gr.Blocks() as c1:
     file_up = gr.File(render=False,file_types= [".pdf"])
     gr.ChatInterface(chat,
