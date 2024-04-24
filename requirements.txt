@@ -28,7 +28,7 @@ cycler==0.12.1
 dateparser==1.2.0
 Deprecated==1.2.14
 diskcache==5.6.3
-duckduckgo_search==5.0
+duckduckgo_search==5.3.0
 etelemetry==0.3.1
 faiss-cpu==1.8.0
 fastapi==0.109.2
@@ -91,7 +91,7 @@ opentelemetry-proto==1.23.0
 opentelemetry-sdk==1.23.0
 opentelemetry-semantic-conventions==0.44b0
 opentelemetry-util-http==0.44b0
-orjson==3.9.15
+orjson==3.10.1
 overrides==7.7.0
 packaging==23.2
 pandas==2.1.4
