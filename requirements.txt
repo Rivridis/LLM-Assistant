@@ -28,7 +28,7 @@ cycler==0.12.1
 dateparser==1.2.0
 Deprecated==1.2.14
 diskcache==5.6.3
-duckduckgo_search==5.3.0
+duckduckgo_search==6.1.1
 etelemetry==0.3.1
 faiss-cpu==1.8.0
 fastapi==0.109.2
@@ -40,8 +40,8 @@ fsspec==2023.12.2
 google-auth==2.29.0
 googleapis-common-protos==1.63.0
 googlesearch-python==1.2.3
-gradio==4.22.0
-gradio_client==0.13.0
+gradio==4.31.5
+gradio_client==0.16.4
 gradio_pdf==0.0.5
 grpcio==1.62.1
 h11==0.14.0
@@ -91,7 +91,7 @@ opentelemetry-proto==1.23.0
 opentelemetry-sdk==1.23.0
 opentelemetry-semantic-conventions==0.44b0
 opentelemetry-util-http==0.44b0
-orjson==3.10.1
+orjson==3.10.3
 overrides==7.7.0
 packaging==23.2
 pandas==2.1.4
@@ -123,6 +123,7 @@ PyPika==0.48.9
 pyproject_hooks==1.0.0
 pyreadline3==3.4.1
 PyRect==0.2.0
+pyreqwest_impersonate==0.4.5
 PyScreeze==0.1.30
 python-dateutil==2.8.2
 python-dotenv==1.0.1
@@ -164,7 +165,7 @@ trafilatura==1.7.0
 traits==6.3.2
 transformers==4.38.2
 txtai==7.0.0
-typer==0.9.0
+typer==0.12.3
 typing_extensions==4.9.0
 tzdata==2023.4
 tzlocal==5.2
