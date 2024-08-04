@@ -1,15 +1,15 @@
-# Imports
 from llama_cpp import Llama,LlamaGrammar
 import re
 from duckduckgo_search import DDGS
 import gradio as gr
 import json
 from pypdf import PdfReader
+from trafilatura import fetch_url, extract
 import chromadb
 from pathlib import Path
 import pyperclip as pc
 import pyautogui
-
+import datetime
 
 #GBNF Grammar
 grmtxt = r'''
@@ -26,78 +26,14 @@ number ::= [0-9]+  "."?  [0-9]*
 stringlist ::= "[" ws "]" | "[" ws string ("," ws string)* ws "]"
 '''
 grammar = LlamaGrammar.from_string(grmtxt)
-
-# LLM Settings
-llm = Llama(
-  model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", 
-  n_ctx=2048,  
-  n_threads=4,            
-  n_gpu_layers=30,
-  n_batch=512    
-)
-
-# Global Variables
-chat_memory = ""
-client = chromadb.Client()
-
-# Chat Function
-def chat(message,history,file_path):
-    if file_path != None:
-        file_name = Path(file_path).stem
-        fl = file_name.lower()
-        fl = fl.replace(" ", "_")
-        pglst = []
-        reader = PdfReader(str(file_path))
-        number_of_pages = len(reader.pages)
-        for i in range(0,number_of_pages):
-            page = reader.pages[i]
-            text = page.extract_text()
-            pglst.append(text)
-        collection = client.get_or_create_collection(name=str(fl))
-        collection.add(
-        documents=pglst,
-        ids=[f"{i}" for i in range(len(pglst))],)
-
-        prompt = message
-        results = collection.query(
-        query_texts=[prompt],
-        n_results=2,)
-        print(results)
-
-        systemRAG = """You are an AI Assistant named Vivy, who is trained for answering questions from a given PDF's context. You are provided with the context from the PDF as given below. Only use the given context to answer the user's question. If no context is given, or the user's question is not there in the given context, let the user know that their question can't be answered. Parse the given context, so it can be readable by the user, and explain the user's query using the context. Mention the page numbers in your response too.
-        Current Context:
-        {}
-        Page Numbers:
-        {}
-
-        Output Format:
-        Explanation of given context with Query
-        Page Numbers
-        """.format(str(results['documents']),str(results['ids']))
-
-        output = llm(
-        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(systemRAG,prompt),
-        max_tokens=-1,
-        stop=["<|im_start|>","<|im_end|>"],
-        temperature=0.8,
-        top_k=40,
-        repeat_penalty=1.1,
-        min_p=0.05,
-        top_p=0.95,
-        echo=False,
-        )
-        llm_out = output['choices'][0]['text']
-        return llm_out
-                
-    # Tool Calling
-    global chat_memory
-    system1 = """
+config=json.loads((open("config.json","r")).read())
+systemPrompts=[
+    """
     You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function. Make sure to call functions when necessary, according to the given context in the question.Don't reply as if you already called the function, as it takes place later. Ask the user for more details if necessary.
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
-    Current Date : "25-01-2024"
-    Current Time : "5:03 PM"
+    Current Date And Time : """+str(datetime.datetime.now())+""""
     Current Location : "Tokyo, Japan"
 
     Functions
@@ -106,8 +42,8 @@ def chat(message,history,file_path):
     Example: search(when was Nehru born)
     '''
     
-    def weather(location)
-    '''Takes in location, and returns weather. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg. This function is used for retrieving weather data, temperature, pressure etc when the user asks for it.''
+    def weather()
+    ''' When the user ask for the weather, you must retrieve weather data, temperature, pressure, etc, in order to retrieve the data, you MUST use the 'search' function aforementioned with the location the user gave you as the query 
 
     def play(music_name)
     '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. eg, play(Nights - Avicii). Always reccomend the user a song, and don't give a general name'''
@@ -152,42 +88,109 @@ def chat(message,history,file_path):
     {"assistant_reply":"Sure! You shall be able to hear that song right about now!","function_called":["play(Shape of you)"]}
 
     You have been given the transcript of the previous conversations below, so that you can refer back to what the user said earlier. Use this transcript to formulate the best response using context clues
+    """,
     """
+    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. The user can see your previous response too, so acknowledge it. If the previous response is wrong or irrelevant to the function call, let the user know. If search function is being used, make sure to mention the date of search result.
+
+    Output Format:
+    Assistant Response
+    Function Citation
+    Function Call Result Date - Date/Not Applicable
+    Function Call Sucessfull - Yes/No
+    """,
+    
+    
+]
+try:
+    llm = Llama(
+      model_path=config["path"],
+      n_ctx=config["context_length"],  
+      n_threads=config["cpu_threads"],
+      n_gpu_layers=config["gpu_offload"],
+      n_batch=config["n_batch"],
+      flash_attn=config["flash_attention"]
+    )
+except:
+    print("Are you sure you have the minimum requirements to run this model?, try settings GPU offload to 0 and then go up from there") 
+# Global Variables
+chat_memory = ""
+client = chromadb.Client()
+#chatSess=open(f"{config['path']}/chat,txt")
+# Chat Function
+def chat(message,history,file_path):
+    if file_path != None:
+        file_name = Path(file_path).stem
+        fl = file_name.lower()
+        fl = fl.replace(" ", "_")
+        pglst = []
+        reader = PdfReader(str(file_path))
+        number_of_pages = len(reader.pages)
+        for i in range(0,number_of_pages):
+            page = reader.pages[i]
+            text = page.extract_text()
+            pglst.append(text)
+        collection = client.get_or_create_collection(name=str(fl))
+        collection.add(
+        documents=pglst,
+        ids=[f"{i}" for i in range(len(pglst))],)
+        prompt = message
+        results = collection.query(
+        query_texts=[prompt],
+        n_results=2,)
+        #print(results)
+        output = llm(
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(("""You are an AI Assistant named Vivy, who is trained for answering questions from a given PDF's context. You are provided with the context from the PDF as given below. Only use the given context to answer the user's question. If no context is given, or the user's question is not there in the given context, let the user know that their question can't be answered. Parse the given context, so it can be readable by the user, and explain the user's query using the context. Mention the page numbers in your response too.
+        Current Context:
+        {}
+        Page Numbers:
+        {}
+
+        Output Format:
+        Explanation of given context with Query
+        Page Numbers
+        """.format(str(results['documents']),str(results['ids']))),prompt),
+        max_tokens=config["max_tokens"],
+        stop=["<|im_start|>","<|im_end|>"],
+        temperature=config["temperature"],
+        top_k=config["top_k"],
+        repeat_penalty=config["repeat_penalty"],
+        min_p=config["min_p_sampling"],
+        top_p=config["max_p_sampling"],
+        echo=False,
+        )
+        llm_out = output['choices'][0]['text']
+        return llm_out
+    # Tool Calling
+    global chat_memory
     prompt = message
     output = llm(
-    "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system1+chat_memory,prompt),
-    max_tokens=-1,
+    "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(systemPrompts[0]+chat_memory,prompt),
+    max_tokens=config["max_tokens"],
     stop=["<|im_start|>","<|im_end|>"],
-    temperature=0.8,
-    top_k=40,
-    repeat_penalty=1.1,
-    min_p=0.05,
-    top_p=0.95,
+    temperature=config["temperature"],
+    top_k=config["top_k"],
+    repeat_penalty=config["repeat_penalty"],
+    min_p=config["min_p_sampling"],
+    top_p=config["max_p_sampling"],
     echo=False,
     grammar=grammar
     )
-    
-    #Output
     llm_out = output['choices'][0]['text']
     chat_memory+="user {}\n".format(prompt)
     chat_memory+="assistant {}\n".format(str(llm_out))
 
     search_dict = json.loads(llm_out)
-    print(search_dict)
+    #print(search_dict)
     search_list = search_dict["function_called"]
 
     
     opt = ""
-    
     for i in search_list:     
         # Internet Search
-        from trafilatura import fetch_url, extract
         if "search" in i:
             link = []
-            mainp = ""
-            
-            pattern = r"\(([^)]+)\)"
-            matches = re.findall(pattern, str(i))
+            mainp=""
+            matches = re.findall("\(([^)]+)\)", str(i))
             
             results = DDGS().text(str(matches[0]), region='wt-wt', safesearch='off', timelimit='y', max_results=2)
             for i in results:
@@ -203,18 +206,15 @@ def chat(message,history,file_path):
             mainp += content       
             
             if len(mainp) > 6000:
-                mainp = mainp[:5500]
+                mainp= mainp[:5500]
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"
             
             else:
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n" 
-        
         elif "youtube" in i:
-            pattern = r"\(([^)]+)\)"
-            matches = re.findall(pattern, str(i))
-
+            matches = re.findall(r"\(([^)]+)\)", str(i))
             results = DDGS().videos(
             keywords=str(matches[0]),
             region="wt-wt",
@@ -226,28 +226,14 @@ def chat(message,history,file_path):
             )
             val = ""
             for i in results:
-                val += str(i['content'])
-                val += '\n'
-                val += str(i['description'])
-                val += '\n'
-            opt += "The value of function call " + str(i)+ " is " + val
-            opt += "\n"
-            print(val)
+                val += f"{str(i['content'])}\n{str(i['description'])}\n"
+            opt += f"The value of function call {str(i)} is {val}\n"
+            #print(val)
 
         else:
                 opt += "NONE"
 
     if opt != "NONE":
-        system2 = """
-        You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. The user can see your previous response too, so acknowledge it. If the previous response is wrong or irrelevant to the function call, let the user know. If search function is being used, make sure to mention the date of search result.
-
-        Output Format:
-        Assistant Response
-        Function Citation
-        Function Call Result Date - Date/Not Applicable
-        Function Call Sucessfull - Yes/No
-        """
-        
         userv = """
         User Input {}
         Prev Response {}
@@ -255,14 +241,14 @@ def chat(message,history,file_path):
         """.format(prompt,llm_out,opt)
         
         output2 = llm(
-        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(system2,userv),
-        max_tokens=-1,
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(systemPrompts[1],userv),
+        max_tokens=config["max_tokens"],
         stop=["<|im_start|>","<|im_end|>"],
-        temperature=0.8,
-        top_k=40,
-        repeat_penalty=1.1,
-        min_p=0.05,
-        top_p=0.95,
+        temperature=config["temperature"],
+        top_k=config["top_k"],
+        repeat_penalty=config["repeat_penalty"],
+        min_p=config["min_p_sampling"],
+        top_p=config["max_p_sampling"],
         echo=False,
         )
         llm_out2 = output2['choices'][0]['text']
@@ -275,24 +261,22 @@ def chat(message,history,file_path):
         return str(search_dict["assistant_reply"]) + "\n" + str(llm_out2)
     else:
         return str(search_dict["assistant_reply"]) + "\n"
-
 def realtime():
     while True:
-        compt = """You are an AI model who can read user's text. You have to help them write their messages, expand upon it, explain it or summarize it according to what the user wants. The user will mention what they want to do with the text before giving the input. If the user does not give the usage, make your guess depending on the content of the text, such as a email reply or content explanation. Commands are prefaced with a #.
+        prompt = pc.waitForNewPaste()
+        output = llm(
+        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format("""You are an AI model who can read user's text. You have to help them write their messages, expand upon it, explain it or summarize it according to what the user wants. The user will mention what they want to do with the text before giving the input. If the user does not give the usage, make your guess depending on the content of the text, such as a email reply or content explanation. Commands are prefaced with a #.
         Example:
         #Rewrite this text
         #Reply to this email
-        """
-        prompt = pc.waitForNewPaste()
-        output = llm(
-        "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(compt,prompt),
-        max_tokens=-1,
+        """,prompt),
+        max_tokens=config["max_tokens"],
         stop=["<|im_start|>","<|im_end|>"],
-        temperature=0.8,
-        top_k=40,
-        repeat_penalty=1.1,
-        min_p=0.05,
-        top_p=0.95,
+        temperature=config["temperature"],
+        top_k=config["top_k"],
+        repeat_penalty=config["repeat_penalty"],
+        min_p=config["min_p_sampling"],
+        top_p=config["max_p_sampling"],
         echo=False,
         )
         llm_out = output['choices'][0]['text']
@@ -305,7 +289,7 @@ def realtime():
         yield pc.paste()
 
 
-# Main Code    
+# Main Code
 with gr.Blocks() as c1:
     file_up = gr.File(render=False,file_types= [".pdf"])
     gr.ChatInterface(chat,
