@@ -1,5 +1,5 @@
 # LLM-Assistant
-LLM-Assistant is a browser interface based on Gradio that interfaces with local LLMs to call functions and act as a general assistant.
+Bleeding-edge branch of LLM-Assistant where new changes are tested.
 
 ## Features
 * Works with any instruct-finetuned LLM
