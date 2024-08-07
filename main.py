@@ -10,6 +10,8 @@ from pathlib import Path
 import pyperclip as pc
 import pyautogui
 import datetime
+import time
+import config
 
 #GBNF Grammar
 grmtxt = r'''
@@ -110,7 +112,9 @@ try:
       flash_attn=config["flash_attention"]
     )
 except:
-    print("Are you sure you have the minimum requirements to run this model?, try settings GPU offload to 0 and then go up from there") 
+    print("Are you sure you have the minimum requirements to run this model?, try settings GPU offload to 0 and then go up from there")
+    time.sleep(3)
+    exit() 
 
 # Global Variables
 chat_memory = ""

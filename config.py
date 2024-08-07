@@ -14,7 +14,7 @@ config = {"path": str(path), "gpu_offload": 20, "context_length": 2048, "cpu_thr
 with open('config.json', 'w') as f:
     json.dump(config, f)
 
-Op = input("Press 1 to enter advanced configuration mode or press 2 to exit")
+Op = input("Press 1 to enter advanced configuration mode or press 2 to exit configuration: ")
 if Op == "1":
     print("Welcome to the advanced configuration mode!")
     print("Here are the settings you can change:")
@@ -36,10 +36,9 @@ if Op == "1":
                 f.write(json.dumps(config))
         else:
             print("Exiting configuration")
-            exit()
+            break
     
 else:
     print("Exiting configuration")
-    exit()
 
 
