@@ -1,39 +1,45 @@
-import json,re
+import tkinter as tk
+from tkinter import filedialog
+
+root = tk.Tk()
+root.withdraw()
+
+import json
+
 print("Welcome to the configuration program!")
-path=str(input("Please input your LLM-Assistant path: ")).replace("\\","/")
-if(path[-1]=='/'):
-    path=path[:-1]
-conf=json.loads(open(f"{path}/config.json").read())
-keys=conf.keys();
-if(input("Do you wish to see the advanced configuration or just the basic configuration?(Type 1 or 2): ")=="1"):
-    print(f"This is your actual configuration: {conf}")
-    inpt=input("If you wish to modify it, type the name of the setting you want to change, else, type 'close'")
-    if(inpt=="close" or (inpt in keys)==False):
-        exit()
-    val=input(f"type the new value for {inpt}")
-    if((isInstance(val,int))==True):
-        conf[inpt]=int(val)
-        with open(f"{path}/config.json","w") as f:
-            f.write(json.dumps(conf))
-        input("The program will now exit, press enter")
-        exit()
-    conf[inpt]=val
-    with open(f"{path}/config.json","w") as f:
-        f.write(json.dumps(conf))
-    input("The program will now exit, press enter")
-    exit()
-inp=input(f"This is your configuration:\n1. Path:{conf['path']}\n2. GPU offload/Layers(Makes the model run faster):{conf['gpu_offload']}\n3. CPU Threads(More is not always better):{conf['cpu_threads']}\n4. System Prompt:{conf['system_prompt']}\nEnter the number of the setting you want to change or type 'close' to exit: ")
-if(inp=="1"):
-    conf["path"]=input("Enter the new path: ")
-elif(inp=="2"):
-    conf["gpu_offload"]=int(input("Enter the number of layers: "))
-elif(inp=="3"):
-    conf["cpu_threads"]=int(input("Enter the number of threads: "))
+
+path = filedialog.askopenfilename()
+config = {"path": str(path), "gpu_offload": 20, "context_length": 2048, "cpu_threads": 4, "n_batch": 512, "flash_attention": 1, "max_tokens": -1, "temperature": 0.8, "top_k": 40, "repeat_penalty": 1.1, "min_p_sampling": 0.05, "max_p_sampling": 0.05}
+
+with open('config.json', 'w') as f:
+    json.dump(config, f)
+
+Op = input("Press 1 to enter advanced configuration mode or press 2 to exit")
+if Op == "1":
+    print("Welcome to the advanced configuration mode!")
+    print("Here are the settings you can change:")
+    print("1. GPU offload - This setting determines how many layers of the model will be offloaded to the GPU. Increasing this value will make the model run faster.")
+    print("2. CPU Threads - This setting determines how many threads the model will use. Increasing this value might make the model run faster but may cause instability.")
+
+    while True:
+        print(f"This is your current configuration: \n{config}")
+        choice = input("Enter the number of the setting you want to change or type 'exit' to exit: ")
+        if choice == "1":
+            val = int(input("Enter the new value for GPU offload: "))
+            config["gpu_offload"] = val
+            with open('config.json', 'w') as f:
+                f.write(json.dumps(config))
+        elif choice == "2":
+            val = int(input("Enter the new value for CPU Threads: "))
+            config["cpu_threads"] = val
+            with open('config.json', 'w') as f:
+                f.write(json.dumps(config))
+        else:
+            print("Exiting configuration")
+            exit()
+    
 else:
-    conf["system_prompt"]=input("Enter the new System Prompt: ")
-with open(f"{path}/config.json","w") as f:
-    f.write(json.dumps(conf))
-input("The program will now exit, press enter")
-exit()
+    print("Exiting configuration")
+    exit()
 
 

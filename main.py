@@ -26,14 +26,14 @@ number ::= [0-9]+  "."?  [0-9]*
 stringlist ::= "[" ws "]" | "[" ws string ("," ws string)* ws "]"
 '''
 grammar = LlamaGrammar.from_string(grmtxt)
-config=json.loads((open("config.json","r")).read())
+config = json.loads((open("config.json","r")).read())
 systemPrompts=[
     """
     You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You are trained in python function calling and you need to use these functions to answer the user's questions. You are given the docstring of these functions as well as the format to respond in. You are also given all the current function values below, which you have to use to call a function, as well as create a response. Do not respond as if you can use a function, and only respond if a function given below can be used for the user's query. Ask the user for more details before calling a function. Make sure to call functions when necessary, according to the given context in the question.Don't reply as if you already called the function, as it takes place later. Ask the user for more details if necessary.
     
     Current Values, for which functions calls are not needed. Remember these values.
     Current Music Playing : "Never gonna give you up"
-    Current Date And Time : """+str(datetime.datetime.now())+""""
+    Current Date And Time : """+str(datetime.datetime.now())+"""
     Current Location : "Tokyo, Japan"
 
     Functions
@@ -97,10 +97,9 @@ systemPrompts=[
     Function Citation
     Function Call Result Date - Date/Not Applicable
     Function Call Sucessfull - Yes/No
-    """,
+    """]    
     
-    
-]
+
 try:
     llm = Llama(
       model_path=config["path"],
@@ -112,10 +111,11 @@ try:
     )
 except:
     print("Are you sure you have the minimum requirements to run this model?, try settings GPU offload to 0 and then go up from there") 
+
 # Global Variables
 chat_memory = ""
 client = chromadb.Client()
-#chatSess=open(f"{config['path']}/chat,txt")
+
 # Chat Function
 def chat(message,history,file_path):
     if file_path != None:
@@ -137,14 +137,13 @@ def chat(message,history,file_path):
         results = collection.query(
         query_texts=[prompt],
         n_results=2,)
-        #print(results)
+    
         output = llm(
         "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(("""You are an AI Assistant named Vivy, who is trained for answering questions from a given PDF's context. You are provided with the context from the PDF as given below. Only use the given context to answer the user's question. If no context is given, or the user's question is not there in the given context, let the user know that their question can't be answered. Parse the given context, so it can be readable by the user, and explain the user's query using the context. Mention the page numbers in your response too.
         Current Context:
         {}
         Page Numbers:
         {}
-
         Output Format:
         Explanation of given context with Query
         Page Numbers
@@ -160,6 +159,7 @@ def chat(message,history,file_path):
         )
         llm_out = output['choices'][0]['text']
         return llm_out
+    
     # Tool Calling
     global chat_memory
     prompt = message
@@ -190,7 +190,7 @@ def chat(message,history,file_path):
         if "search" in i:
             link = []
             mainp=""
-            matches = re.findall("\(([^)]+)\)", str(i))
+            matches = re.findall(r"\(([^)]+)\)", str(i))
             
             results = DDGS().text(str(matches[0]), region='wt-wt', safesearch='off', timelimit='y', max_results=2)
             for i in results:
