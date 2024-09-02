@@ -16,9 +16,9 @@ Bleeding-edge branch of LLM-Assistant where new changes are tested.
 * Rare crashes
 
 ## Changelog
-* Fixed search feature
 * Youtube video search
 * File Upload
+* Music Function
 
 ## Setup
 ### Setup on Windows 10/11
@@ -29,8 +29,7 @@ Bleeding-edge branch of LLM-Assistant where new changes are tested.
 
 ### Usage
 * Use Assistant mode for general chat, and calling functions to execute like playing music, as well as PDF question answering
-* Use Realtime mode for editing a word document or replying to an email in realtime, directly by copying a selection and waiting for the output.
-The output gets auto pasted at cursor location.
+* Use Realtime mode for editing a word document or replying to an email in realtime, directly by copying a selection and waiting for the output. The output gets auto pasted at cursor location.
 
 ## Images
 

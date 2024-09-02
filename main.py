@@ -41,14 +41,17 @@ systemPrompts=[
     Functions
     def search(query)
     '''Takes in a query string and returns search result. Whenever the user asks a question that needs information about dates or facts, use this function. This can range from birthdays, facts that need to be correct, or festivals. Use this function when a question's answer requires updated/real-time information too. This function is used as a google search function. Make sure to fact check your replies using this function. Use this for news too.
-    Example: search(when was Nehru born)
+    Example: search(How far is the moon from the earth)
     '''
     
-    def weather()
-    ''' When the user ask for the weather, you must retrieve weather data, temperature, pressure, etc, in order to retrieve the data, you MUST use the 'search' function aforementioned with the location the user gave you as the query 
+    def weather(location)
+    ''' Takes in location, and returns weather, temperature and pressure data. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg. This function is used for retrieving weather data, temperature, pressure etc when the user asks for it. Make sure to use this function whenever the user asks for weather information. Always use this function when the user asks for weather information.
+    Example: weather(Tokyo, Japan)'''
 
-    def play(music_name)
-    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. eg, play(Nights - Avicii). Always include the name of the song and artist in the response.'''
+    def play(musicname - artist)
+    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. Always use this function for music.
+    Example:play(Nights - Avicii).
+    '''
 
     def pause()
     '''Pauses any music playing in system'''
@@ -57,7 +60,7 @@ systemPrompts=[
     '''Takes no input, and returns the content of the first 5 unread emails with titles'''
 
     def youtube()
-    '''Takes query string as input, and returns 10 youtube videos on the query. Used for reccomending users videos or searching for videos to watch. Make sure to use this function whenever the user wants some youtube videos.
+    '''Takes query string as input, and returns 10 youtube videos on the query. Used for reccomending users videos or searching for videos to watch. Make sure to use this function whenever the user wants some youtube videos. Don't use this function to play music.
     eg, youtube(cute cat videos)'''
 
     def none()
@@ -183,10 +186,10 @@ def chat(message,history,file_path):
     chat_memory+="user {}\n".format(prompt)
     chat_memory+="assistant {}\n".format(str(llm_out))
 
-    search_dict = json.loads(llm_out)
-    #print(search_dict)
+    search_dict = json.loads(llm_out,strict=False)
+    print(search_dict)
     search_list = search_dict["function_called"]
-
+    
     
     opt = ""
     for i in search_list:     
@@ -217,6 +220,7 @@ def chat(message,history,file_path):
             else:
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n" 
+        
         elif "youtube" in i:
             matches = re.findall(r"\(([^)]+)\)", str(i))
             results = DDGS().videos(
@@ -232,16 +236,17 @@ def chat(message,history,file_path):
             for i in results:
                 val += f"{str(i['content'])}\n{str(i['description'])}\n"
             opt += f"The value of function call {str(i)} is {val}\n"
-            #print(val)
+        
         elif "play" in i:
             import pywhatkit
             matches = re.findall(r"\(([^)]+)\)", str(i))
             pywhatkit.playonyt(str(matches[0]))
+            opt += f"The value of function call {str(i)} is Current Song Playing: {str(matches[0])}\n"
 
         else:
-                opt += "NONE"
+                opt == "NONE"
 
-    if opt != "NONE":
+    if opt != "NONE" and opt != "":
         userv = """
         User Input {}
         Prev Response {}
