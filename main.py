@@ -48,7 +48,7 @@ systemPrompts=[
     ''' When the user ask for the weather, you must retrieve weather data, temperature, pressure, etc, in order to retrieve the data, you MUST use the 'search' function aforementioned with the location the user gave you as the query 
 
     def play(music_name)
-    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. eg, play(Nights - Avicii). Always reccomend the user a song, and don't give a general name'''
+    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. eg, play(Nights - Avicii). Always include the name of the song and artist in the response.'''
 
     def pause()
     '''Pauses any music playing in system'''
@@ -233,6 +233,10 @@ def chat(message,history,file_path):
                 val += f"{str(i['content'])}\n{str(i['description'])}\n"
             opt += f"The value of function call {str(i)} is {val}\n"
             #print(val)
+        elif "play" in i:
+            import pywhatkit
+            matches = re.findall(r"\(([^)]+)\)", str(i))
+            pywhatkit.playonyt(str(matches[0]))
 
         else:
                 opt += "NONE"
