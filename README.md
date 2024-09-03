@@ -16,7 +16,7 @@ For the lastest features, please check out the dev branch
 * More functions
 
 ## Current Bugs
-* Rare crashes
+* None
 
 ## Changelog
 * Fixed search feature
