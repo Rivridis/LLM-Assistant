@@ -115,7 +115,7 @@ try:
       flash_attn=config["flash_attention"]
     )
 except:
-    print("Are you sure you have the minimum requirements to run this model?, try settings GPU offload to 0 and then go up from there")
+    print("Are you sure you have the minimum requirement to run this model? Try setting the GPU offload to 0 and then go up from there")
     time.sleep(3)
     exit() 
 
