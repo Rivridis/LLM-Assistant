@@ -4,6 +4,7 @@ from tkinter import filedialog
 root = tk.Tk()
 root.withdraw()
 
+
 import json
 
 print("Welcome to the configuration program!")

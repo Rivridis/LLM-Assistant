@@ -11,14 +11,14 @@ Bleeding-edge branch of LLM-Assistant where new changes are tested.
 ## Roadmap
 * Voice access
 * More functions
+* Custom finetuned model
 
 ## Current Bugs
-* Rare crashes
+* Crashes
+* duckduckgo ratelimits
 
 ## Changelog
-* Youtube video search
-* File Upload
-* Music Function
+* Updated to the latest gradio version
 
 ## Setup
 ### Setup on Windows 10/11

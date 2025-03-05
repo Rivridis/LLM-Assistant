@@ -49,7 +49,7 @@ systemPrompts=[
     Example: weather(Tokyo, Japan)'''
 
     def play(musicname - artist)
-    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. Always use this function for music.
+    '''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song reccomendation, reccomend the user some songs from artists such as Ed Sheeran or Taylor swift or any similar artists. Always use this function for music. You can also use this function to play a media directly from youtube.
     Example:play(Nights - Avicii).
     '''
 
@@ -90,18 +90,16 @@ systemPrompts=[
 
     Input: Please play shape of you
     Output:
-    {"assistant_reply":"Sure! You shall be able to hear that song right about now!","function_called":["play(Shape of you)"]}
+    {"assistant_reply":"Sure! You shall be able to hear that song right about now!","function_called":["play(Shape of you - Ed Sheeran)"]}
 
     You have been given the transcript of the previous conversations below, so that you can refer back to what the user said earlier. Use this transcript to formulate the best response using context clues
     """,
     """
-    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the value of the function called. Use these information to formulate a response. The user can see your previous response too, so acknowledge it. If the previous response is wrong or irrelevant to the function call, let the user know. If search function is being used, make sure to mention the date of search result.
+    You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You are given the user input, your previous response, and the result of the function called. Use these information to formulate a response. The user cannot see your previous response, so include the result of the function call in your response as well as your answer. Do not treat your previous response as the answer.
 
     Output Format:
-    Assistant Response
-    Function Citation
-    Function Call Result Date - Date/Not Applicable
-    Function Call Sucessfull - Yes/No
+    Assistant Response - Use the function call result value to respond to the user input
+    Function Call Sucessfull -  Yes/No
     """]    
     
 
@@ -169,6 +167,9 @@ def chat(message,history,file_path):
     
     # Tool Calling
     global chat_memory
+    if len(chat_memory) > 5000:
+        chat_memory = chat_memory[:5000]
+    
     prompt = message
     output = llm(
     "<|im_start|>system {}<|im_end|>\n<|im_start|>user {}<|im_end|>\n<|im_start|>assistant".format(systemPrompts[0]+chat_memory,prompt),
@@ -199,7 +200,7 @@ def chat(message,history,file_path):
             mainp=""
             matches = re.findall(r"\(([^)]+)\)", str(i))
             
-            results = DDGS().text(str(matches[0]), region='wt-wt', safesearch='off', timelimit='y', max_results=2)
+            results = DDGS().text(str(matches[0]), region='wt-wt', safesearch='off', timelimit='d', max_results=2)
             for i in results:
                 link.append(i["href"])
 
@@ -212,8 +213,8 @@ def chat(message,history,file_path):
 
             mainp += content       
             
-            if len(mainp) > 6000:
-                mainp= mainp[:5500]
+            if len(mainp) > 5000:
+                mainp= mainp[:5000]
                 opt += "The value of function call " + str(i)+ " is " + mainp
                 opt += "\n"
             
@@ -249,8 +250,8 @@ def chat(message,history,file_path):
     if opt != "NONE" and opt != "":
         userv = """
         User Input {}
-        Prev Response {}
-        Function Call Value {}
+        Previous Response {}
+        Function Call Result {}
         """.format(prompt,llm_out,opt)
         
         output2 = llm(
@@ -267,11 +268,8 @@ def chat(message,history,file_path):
         llm_out2 = output2['choices'][0]['text']
         chat_memory+="{}\n".format(str(llm_out2))
     
-    if len(chat_memory) > 6000:
-        chat_memory = chat_memory[:6000]
-    
     if 'llm_out2' in locals():
-        return str(search_dict["assistant_reply"]) + "\n" + str(llm_out2)
+        return str(llm_out2)
     else:
         return str(search_dict["assistant_reply"]) + "\n"
 def realtime():
@@ -308,7 +306,6 @@ with gr.Blocks() as c1:
     gr.ChatInterface(chat,
     chatbot=gr.Chatbot(height=400,render=False),
     title="AI Assistant",
-    clear_btn="Clear",
     additional_inputs=[file_up],)
 
 with gr.Blocks() as c2:
