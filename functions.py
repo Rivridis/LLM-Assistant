@@ -13,7 +13,7 @@ play_function = """def play(musicname - artist):
 Example: play(Nights - Avicii).'''
 """
 
-pause_function = """def pause():
+pause_function = """def pause(music):
 '''Pauses any music playing in system'''
 """
 
