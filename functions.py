@@ -8,9 +8,13 @@ weather_function = """def weather(location):
 Example: weather(Tokyo, Japan)'''
 """
 
-play_function = """def play(musicname - artist):
-'''Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song recommendation, recommend the user some songs from artists such as Ed Sheeran or Taylor Swift or any similar artists. Always use this function for music. You can also use this function to play a media directly from YouTube.
-Example: play(Nights - Avicii).'''
+play_functions = """def play(musicname - artist):
+Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song recommendation, recommend the user some songs from artists such as Ed Sheeran or Taylor Swift or any similar artists. Always use this function for music. You can also use this function to play a media directly from YouTube.
+Example: play(Nights - Avicii).
+
+def youtube(query):
+Takes query string as input, and returns 10 YouTube videos on the query. Used for recommending users videos or searching for videos to watch. Make sure to use this function whenever the user wants some YouTube videos. Don't use this function to play music. You can even use this function to play random videos from youtube like cat or dog videos, or even baking videos and other similar videos.
+Example: youtube(cute cat videos)
 """
 
 pause_function = """def pause(music):
@@ -19,11 +23,6 @@ pause_function = """def pause(music):
 
 read_mail_function = """def read_mail():
 '''Takes no input, and returns the content of the first 5 unread emails with titles'''
-"""
-
-youtube_function = """def youtube(query):
-'''Takes query string as input, and returns 10 YouTube videos on the query. Used for recommending users videos or searching for videos to watch. Make sure to use this function whenever the user wants some YouTube videos. Don't use this function to play music.
-Example: youtube(cute cat videos)'''
 """
 
 none_function = """def none():
