@@ -29,7 +29,7 @@ for function in functions:
 message = [
         {
             "role": "system",
-            "content": "You are a helpful function calling AI that outputs in JSON format. Always respond in one word and follow the format of giving function called, and function value is the parameter that is to be called. Do not reply to the user's questions. Details about how to use functions are given below. Strictly follow that. Chat memory is given below as well" ,
+            "content": "You are a helpful function calling AI that outputs in JSON format. Always respond in one word and follow the format of giving function called, and function value is the parameter that is to be called. Do not reply to the user's questions. Details about how to use functions are given below. Strictly follow that. Chat memory is given below as well. Use that to call the correct function value" ,
         },
         {"role": "user", "content": ""},
     ]
@@ -102,8 +102,8 @@ while True:
 
         mainp += content       
         
-        if len(mainp) > 5000:
-            mainp= mainp[:5000]
+        if len(mainp) > 2000:
+            mainp= mainp[:2000]
             opt += "The value of function call - search is " + mainp
             opt += "\n"
         
@@ -154,6 +154,8 @@ while True:
     chat_memory += "Function Called:" + str(func) + "\n"
     chat_memory += "Assistant Response:" + out + "\n"
 
+    if len(chat_memory) > 4500:
+            chat_memory = chat_memory[-4500:]
 
 
 
