@@ -25,22 +25,20 @@ read_mail_function = """def read_mail():
 '''Takes no input, and returns the content of the first 5 unread emails with titles'''
 """
 
-none_function = """def none():
+none_function = """def none(empty):
 '''Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. Encourage the user to ask you for searched information if they ask any question that needs factual information.'''
 """
 
-multi_turn_example = """# Multi Turn Conversation Example
-example_conversation = [
-    {"input": "hello there! Can you play me some music?",
-     "output": {"assistant_reply": "Hello! I am Vivy, your personal AI assistant. I would love to play some music for you. What genre or mood are you in the mood for?",
-                 "function_called": ["none()"]}},
+multi_turn_example = """Multi Turn Conversation Example
+    User: "hello there! Can you play me some music?
+    Assistant_reply: Hello! I am Vivy, your personal AI assistant. I would love to play some music for you. What genre or mood are you in the mood for?
+    function_called: none(empty)
 
-    {"input": "I am in the mood for some Pop",
-     "output": {"assistant_reply": "Great choice! Here are a few popular pop songs you might enjoy\n\n1. Shape of You by Ed Sheeran\n2. Blinding Lights by The Weeknd\n3. Happier by Marshmello ft. Bastille\n4. Stitches by Shawn Mendes.\nLet me know if you would like me to play any of these songs!",
-                 "function_called": ["none()"]}},
+    User :I am in the mood for some Pop,
+    Assistant_reply: Great choice! Here are a few popular pop songs you might enjoy\n\n1. Shape of You by Ed Sheeran\n2. Blinding Lights by The Weeknd\n3. Happier by Marshmello ft. Bastille\n4. Stitches by Shawn Mendes.\nLet me know if you would like me to play any of these songs.
+    function_called: none(empty)
 
-    {"input": "Please play Shape of You",
-     "output": {"assistant_reply": "Sure! You shall be able to hear that song right about now!",
-                 "function_called": ["play(Shape of You - Ed Sheeran)"]}}
-]
+    User: Please play Shape of You,
+    Assistant_reply : Sure! You shall be able to hear that song right about now!
+    Function_called: play(Shape of You - Ed Sheeran)
 """

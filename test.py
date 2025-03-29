@@ -6,7 +6,7 @@ from trafilatura import fetch_url, extract
 
 chat_memory = ""
 # Load the LLaMA model
-llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", chat_format="chatml",n_ctx=2048,n_gpu_layers=20)
+llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", chat_format="chatml",n_ctx=4098,n_gpu_layers=20)
 client = chromadb.Client()
 collection = client.get_or_create_collection(name="functions")
 functions = [
@@ -37,7 +37,7 @@ message = [
 message_main = [
         {
             "role": "system",
-            "content": " You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You will be given the function call value that you called earlier. Use the function call value to formulate your answer. If the function call value is none, then you can chat with the user. You can also refer to the previous conversation. You can also ask the user for more information if needed. Chat memory will be provided below. Use the user input to figure out if the function was called correctly, and let the user know if the function was not called at all. Don't respond to the user's function call without a valid function value. List of functions available are search, weather, play, pause, read_mail, none, multi_turn_example",
+            "content": " You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. You will be given the function call value that you called earlier. Use the function call value to formulate your answer. If the function call value is none, then you can chat with the user. You can also refer to the previous conversation. You can also ask the user for more information if needed. Chat memory will be provided below. Use the user input to figure out if the function was called correctly. Don't respond to the user's function call without a valid function value. List of functions available are search, weather, play, pause, read_mail, none, multi_turn_example",
         },
         {"role": "user", "content": ""},
     ]
@@ -69,7 +69,7 @@ while True:
     message[1]["content"] = inp
     message[0]["content"] += str(results["documents"][0][0])
     message[0]["content"] += chat_memory
-    print(message[0]["content"])
+    #print(message[0]["content"])
 
     # Generate a response
     response = llm.create_chat_completion(
@@ -83,6 +83,7 @@ while True:
 
     opt = ""
     print(func.get("function_called"))
+    print(func.get("function_value"))
     if func.get("function_called") == "search":
 
         link = []
@@ -100,10 +101,11 @@ while True:
             content += str(result)
             content += "Next Search Result\n"
 
-        mainp += content       
+        mainp += content
+        print(mainp)      
         
-        if len(mainp) > 2000:
-            mainp= mainp[:2000]
+        if len(mainp) > 1500:
+            mainp= mainp[:1500]
             opt += "The value of function call - search is " + mainp
             opt += "\n"
         
@@ -139,9 +141,10 @@ while True:
 
 
     message_main[0]["content"] += str(chat_memory)
-    message_main[1]["content"] += "User Message:" + inp + "\n"
-    message_main[1]["content"] += opt
+    message_main[0]["content"] += opt
+    message_main[1]["content"] += inp + "\n"
 
+    print(len(message_main[0]["content"]))
     response = llm.create_chat_completion(
     messages= message_main,
     temperature=0.7,
@@ -151,11 +154,13 @@ while True:
     print(out)
 
     chat_memory += "User Message:" + inp + "\n"
-    chat_memory += "Function Called:" + str(func) + "\n"
+    chat_memory += "Function Called:" + str(func.get("function_called")) + "\n"
     chat_memory += "Assistant Response:" + out + "\n"
 
-    if len(chat_memory) > 4500:
-            chat_memory = chat_memory[-4500:]
+    print(len(chat_memory))
+
+    if len(chat_memory) > 2000:
+            chat_memory = chat_memory[-2000:]
 
 
 
