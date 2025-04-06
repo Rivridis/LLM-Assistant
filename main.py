@@ -4,6 +4,22 @@ from duckduckgo_search import DDGS
 from functions import *
 from trafilatura import fetch_url, extract
 
+import sys
+from pathlib import Path
+
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtQml import QQmlApplicationEngine
+
+
+if __name__ == "__main__":
+    app = QGuiApplication(sys.argv)
+    engine = QQmlApplicationEngine()
+    qml_file = Path(__file__).resolve().parent / "main.qml"
+    engine.load(qml_file)
+    if not engine.rootObjects():
+        sys.exit(-1)
+    sys.exit(app.exec())
+
 chat_memory = ""
 # Load the LLaMA model
 llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", chat_format="chatml",n_ctx=4098,n_gpu_layers=20)
