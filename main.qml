@@ -27,7 +27,7 @@ ApplicationWindow {
                 spacing: 20
                 padding: 20
 
-                Item { Layout.fillHeight: true } // Push settings to the bottom
+                Item { Layout.fillHeight: true }
 
                 // Settings Icon
                 Button {
@@ -114,50 +114,34 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignHCenter
                 }
 
+                ListModel {
+                    id: chatModel
+                    ListElement { sender: "AI"; message: "Hello, This is Vivy, how can I help you today?" }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     color: "#2c2c3f"
                     radius: 10
 
-                    // Simulated chat content
-                    Flickable {
+                    ListView {
+                        id: msgfield
                         anchors.fill: parent
-                        contentHeight: columnContent.height
+                        model: chatModel
                         clip: true
 
-                        Column {
-                            id: columnContent
+                        delegate: Column {
                             width: parent.width
-                            spacing: 12
+                            spacing: 4
                             padding: 10
 
                             Text {
-                                text: "User: Hello AI!"
-                                color: "#fff"
+                                text: model.sender + ": " + model.message
+                                color: model.sender === "User" ? "#fff" : "#bbb"
                                 wrapMode: Text.Wrap
                                 width: parent.width - 40
-                            }
-
-                            Text {
-                                text: "AI: Hello, how can I help you today?"
-                                color: "#bbb"
-                                wrapMode: Text.Wrap
-                                width: parent.width - 40
-                            }
-
-                            Text {
-                                text: "User: Can you summarize this article?"
-                                color: "#fff"
-                                wrapMode: Text.Wrap
-                                width: parent.width - 40
-                            }
-
-                            Text {
-                                text: "AI: Sure! Please paste the article here."
-                                color: "#bbb"
-                                wrapMode: Text.Wrap
-                                width: parent.width - 40
+                                font.pointSize: 14
                             }
                         }
                     }
@@ -169,17 +153,29 @@ ApplicationWindow {
                     spacing: 10
                     Layout.preferredHeight: 60
 
-                    TextField {
+                    Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 50
-                        placeholderText: "Type your message..."
-                        color: "#fff"
-                        font.pixelSize: 16
-                        background: Rectangle {
-                            color: "#333"
-                            radius: 10
+                        Layout.preferredHeight: 90
+                        radius: 10
+                        color: "#2c2c3f"
+                        clip: true
+
+                        ScrollView {
+                            anchors.fill: parent
+                            clip: true
+
+                            TextArea {
+                                id: mytext
+                                wrapMode: TextArea.Wrap
+                                placeholderText: "Type your message..."
+                                color: "#fff"
+                                font.pixelSize: 16
+                                background: null  // remove default background
+                                padding: 10
+                            }
                         }
                     }
+                
 
                     Button {
                         text: "Send"
@@ -187,6 +183,14 @@ ApplicationWindow {
                         background: Rectangle {
                             color: "#5566ff"
                             radius: 10
+                        }
+                        onClicked: {
+                            if (mytext.text !== "") {
+                                chatModel.append({ sender: "User", message: mytext.text })
+                                chatModel.append({ sender: "AI", message: "You said: " + mytext.text })
+                                mytext.text = ""
+                                msgfield.positionViewAtEnd()
+                            }
                         }
                     }
                 }
