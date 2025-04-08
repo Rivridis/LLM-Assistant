@@ -59,10 +59,8 @@ response_format = {
         },
     }
 
-
-while True:
-    inp = input("Enter a message: ")
-
+def process(text):
+    inp = text
     results = collection.query(
         query_texts=[inp],
         n_results=1  # Get the best match
