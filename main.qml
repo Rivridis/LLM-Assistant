@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import mymodule
 
 ApplicationWindow {
     id: window
@@ -10,6 +11,9 @@ ApplicationWindow {
     height: 600
     title: "AI Chat App"
     color: "#1e1e2f"
+    Backend {
+        id: backend
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -26,7 +30,6 @@ ApplicationWindow {
                 anchors.fill: parent
                 spacing: 20
                 padding: 20
-
                 Item { Layout.fillHeight: true }
 
                 // Settings Icon
@@ -188,6 +191,7 @@ ApplicationWindow {
                             if (mytext.text !== "") {
                                 chatModel.append({ sender: "User", message: mytext.text })
                                 chatModel.append({ sender: "AI", message: "You said: " + mytext.text })
+                                backend.process(mytext.text)
                                 mytext.text = ""
                                 msgfield.positionViewAtEnd()
                             }
