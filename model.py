@@ -59,7 +59,10 @@ response_format = {
         },
     }
 
-def process(text):
+def process_chat(text):
+    print(text)
+    global chat_memory
+    message_main[1]["content"] = ""
     inp = text
     results = collection.query(
         query_texts=[inp],
@@ -69,7 +72,7 @@ def process(text):
     message[1]["content"] = inp
     message[0]["content"] += str(results["documents"][0][0])
     message[0]["content"] += chat_memory
-    #print(message[0]["content"])
+
 
     # Generate a response
     response = llm.create_chat_completion(
@@ -136,7 +139,7 @@ def process(text):
         opt += f"Function call - play is successful. Current Song Playing: {str(match)}\n"
 
     if func.get("function_called") == "none":
-        opt += "No function called"
+        opt += " No function called"
 
 
 
@@ -153,12 +156,12 @@ def process(text):
     out = response["choices"][0]["message"]["content"]
     print(out)
 
-    chat_memory += "User Message:" + inp + "\n"
-    chat_memory += "Function Called:" + str(func.get("function_called")) + "\n"
-    chat_memory += "Assistant Response:" + out + "\n"
+    chat_memory += " User Message:" + inp
+    chat_memory += " Function Called:" + str(func.get("function_called"))
+    chat_memory += " Assistant Response:" + out
 
     print(len(chat_memory))
 
     if len(chat_memory) > 2000:
             chat_memory = chat_memory[-2000:]
-
+    return(out)

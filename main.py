@@ -15,8 +15,9 @@ class Backend(QObject):
     @Slot(str, result=str)
     def process(self, text):
         print(f"QML sent: {text}")
+        output = model.process_chat(text)
         # Replace this with your actual AI/LLM processing
-        return f"AI Response: You said '{text}'"
+        return output
 
 
 

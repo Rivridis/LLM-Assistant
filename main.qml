@@ -1,3 +1,4 @@
+// qmllint disable
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -187,18 +188,26 @@ ApplicationWindow {
                             color: "#5566ff"
                             radius: 10
                         }
+
                         onClicked: {
                             if (mytext.text !== "") {
-                                chatModel.append({ sender: "User", message: mytext.text })
-                                chatModel.append({ sender: "AI", message: "You said: " + mytext.text })
-                                backend.process(mytext.text)
+                                let userInput = mytext.text
+                                chatModel.append({ sender: "User", message: userInput })
                                 mytext.text = ""
                                 msgfield.positionViewAtEnd()
+
+                                // Let UI update, then block
+                                Qt.callLater(() => {
+                                    let val = backend.process(userInput)  // this can block
+                                    chatModel.append({ sender: "AI", message: val })
+                                    msgfield.positionViewAtEnd()
+                                })
                             }
-                        }
+                        }         
                     }
                 }
             }
         }
     }
 }
+//qmllint disable
