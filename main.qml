@@ -182,28 +182,34 @@ ApplicationWindow {
                 
 
                     Button {
+                        id: send
                         text: "Send"
                         Layout.preferredHeight: 50
                         background: Rectangle {
                             color: "#5566ff"
                             radius: 10
                         }
+                        enabled: true  // Initially enabled
 
                         onClicked: {
                             if (mytext.text !== "") {
+                                send.enabled = false
                                 let userInput = mytext.text
                                 chatModel.append({ sender: "User", message: userInput })
                                 mytext.text = ""
                                 msgfield.positionViewAtEnd()
+                                backend.process(userInput)
 
-                                // Let UI update, then block
-                                Qt.callLater(() => {
-                                    let val = backend.process(userInput)  // this can block
-                                    chatModel.append({ sender: "AI", message: val })
-                                    msgfield.positionViewAtEnd()
-                                })
                             }
                         }         
+                    }
+                Connections {
+                target: backend
+                function onResultReady(val){
+                    chatModel.append({ sender: "AI", message: val })
+                    send.enabled = true
+                    msgfield.positionViewAtEnd()
+                        }
                     }
                 }
             }

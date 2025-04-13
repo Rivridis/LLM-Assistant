@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from PySide6.QtCore import QObject, Slot
+from PySide6.QtCore import QObject, Slot, Signal, QThread, QMetaObject, Qt, Q_ARG
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
@@ -9,16 +9,42 @@ import model
 QML_IMPORT_NAME = "mymodule"
 QML_IMPORT_MAJOR_VERSION = 1
 
+class Worker(QObject):
+    finished = Signal()
+    resultReady = Signal(str)
+
+    @Slot(str)
+    def process(self, text):
+        result = model.process_chat(text)
+        self.resultReady.emit(result)
+        self.finished.emit()
 
 @QmlElement
 class Backend(QObject):
-    @Slot(str, result=str)
-    def process(self, text):
-        print(f"QML sent: {text}")
-        output = model.process_chat(text)
-        # Replace this with your actual AI/LLM processing
-        return output
+    resultReady = Signal(str)
 
+    def __init__(self):
+        super().__init__()
+        self.thread = QThread()
+        self.worker = Worker()
+
+        self.worker.moveToThread(self.thread)
+        self.worker.resultReady.connect(self.handle_result)
+        self.thread.start()
+
+    @Slot(str)
+    def process(self, text):
+        QMetaObject.invokeMethod(
+            self.worker,
+            "process",
+            Qt.QueuedConnection,
+            Q_ARG(str, text)
+        )
+
+    @Slot(str)
+    def handle_result(self, output):
+        print(f"[Backend] Result: {output}")
+        self.resultReady.emit(output)
 
 
 if __name__ == "__main__":
