@@ -10,7 +10,7 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 600
-    title: "AI Chat App"
+    title: "Windows Assistant"
     color: "#1e1e2f"
     Backend {
         id: backend
@@ -40,10 +40,10 @@ ApplicationWindow {
                     anchors.horizontalCenter: parent.horizontalCenter
                     background: Rectangle {
                         radius: 10
-                        color: "#444"
+                        color: "#3a3a6f"
                     }
                     contentItem: Image {
-                        source: "qrc:/icons/settings.svg"
+                        source: "icons/settings.svg"
                         anchors.centerIn: parent
                         fillMode: Image.PreserveAspectFit
                     }
@@ -111,11 +111,12 @@ ApplicationWindow {
                 spacing: 10
 
                 Label {
-                    text: "AI Assistant Chat"
-                    color: "white"
+                    text: "Windows Assistant"
+                    color: "#bbb"
                     font.pointSize: 18
                     font.bold: true
                     Layout.alignment: Qt.AlignHCenter
+                    padding : 10
                 }
 
                 ListModel {
@@ -159,7 +160,7 @@ ApplicationWindow {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 90
+                        Layout.preferredHeight: 50
                         radius: 10
                         color: "#2c2c3f"
                         clip: true
@@ -184,7 +185,7 @@ ApplicationWindow {
                     Button {
                         id: send
                         text: "Send"
-                        Layout.preferredHeight: 50
+                        Layout.preferredHeight: 47
                         background: Rectangle {
                             color: "#5566ff"
                             radius: 10
