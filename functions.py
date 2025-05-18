@@ -9,7 +9,7 @@ Example: weather(Tokyo, Japan)
 """
 
 play_functions = """def play(musicname - artist):
-Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song recommendation, recommend the user some songs from artists such as Ed Sheeran or Taylor Swift or any similar artists. Always use this function for music. You can also use this function to play a media directly from YouTube.
+Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song recommendation, insert some songs from artists such as Ed Sheeran or Taylor Swift or any similar artists as the function value. Always use this function for music. You can also use this function to play a media directly from YouTube.
 function_called: play
 function_value: The Nights - Avicii
 
