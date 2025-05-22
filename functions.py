@@ -1,49 +1,56 @@
-search_function = """def search(query):
-Takes in a query string and returns search result. Whenever the user asks a question that needs information about dates or facts, use this function. This can range from birthdays, facts that need to be correct, or festivals. Use this function when a question's answer requires updated/real-time information too. This function is used as a google search function. Make sure to fact check your replies using this function. Use this for news too.
-Example: search(How far is the moon from the earth)
+search_function = """Search Function
+Takes in a query string and returns search results.
+Use this when the user asks factual, date-based, or real-time questions.
+This includes things like:
+- Birthdays
+- Historical facts
+- Upcoming events or festivals
+- News or current information
+
+Example:
+{
+    "function_called": "search",
+    "function_value": "How far is the moon from the earth"
+}
 """
 
-weather_function = """def weather(location):
-Takes in location, and returns weather, temperature and pressure data. Default location value is Tokyo, Japan. Use the location given by the user for any other locations eg. This function is used for retrieving weather data, temperature, pressure etc when the user asks for it. Make sure to use this function whenever the user asks for weather information. Always use this function when the user asks for weather information.
-Example: weather(Tokyo, Japan)
+weather_function = """Weather Function
+Takes in a location string and returns weather, temperature, and pressure data.
+Default location is Tokyo, Japan if not provided by the user.
+Use this when the user asks about the weather.
+
+Example:
+{
+    "function_called": "weather",
+    "function_value": "Tokyo, Japan"
+}
 """
 
-play_functions = """def play(musicname - artist):
-Takes in music name eg. Shelter - Porter Robinson, and plays the music in system. If user asks for a random song recommendation, insert some songs from artists such as Ed Sheeran or Taylor Swift or any similar artists as the function value. Always use this function for music. You can also use this function to play a media directly from YouTube.
-function_called: play
-function_value: The Nights - Avicii
+play_functions = """
 
-def youtube(query):
-Takes query string as input, and returns 10 YouTube videos on the query. Used for recommending users videos or searching for videos to watch. Make sure to use this function whenever the user wants some YouTube videos. Don't use this function to play music. You can even use this function to play random videos from youtube like cat or dog videos, or even baking videos and other similar videos.
-function_called: youtube
-function_value: cute cat videos
-"""
+Play Music Function
+Takes a music name with the artist and plays it.
+Use this when the user asks to play a specific song or requests music.
+If the user asks for a recommendation, provide a popular song.
+Also, ask the user for a song before calling this function. If the user does not provide the function value, which is the song name, insert a popular song name as function value, something from Taylor swift, Billie Eilish, or even Jpop like Hatsune Miku songs or Anime songs like Demon Slayer, Attack on Titan, etc.
+Example:
+{
+    "function_called": "play",
+    "function_value": "The Nights - Avicii"
+}
 
-pause_function = """def pause(music):
-Pauses any music playing in system
-"""
+YouTube Function
+Takes a query string and returns YouTube video results.
+Use when the user asks to watch or explore videos (not music).
+Examples include:
+- Animal videos
+- Tutorials
+- Entertainment content
 
-read_mail_function = """def read_mail():
-Takes no input, and returns the content of the first 5 unread emails with titles
-"""
-
-none_function = """def none(empty):
-Takes no input, and returns no output. Used when no other function call is needed, and the user is just chatting with the model. Also used for referring back to previous conversations. Encourage the user to ask you for searched information if they ask any question that needs factual information.
-function_called = none
-function_value = empty
-"""
-
-multi_turn_example = """Multi Turn Conversation Example
-    User: "hello there! Can you play me some music?
-    Assistant_reply: Hello! I am Vivy, your personal AI assistant. I would love to play some music for you. What genre or mood are you in the mood for?
-    function_called: none
-
-    User :I am in the mood for some Pop,
-    Assistant_reply: Great choice! Here are a few popular pop songs you might enjoy\n\n1. Shape of You by Ed Sheeran\n2. Blinding Lights by The Weeknd\n3. Happier by Marshmello ft. Bastille\n4. Stitches by Shawn Mendes.\nLet me know if you would like me to play any of these songs.
-    function_called: none
-
-    User: Please play Shape of You,
-    Assistant_reply : Sure! You shall be able to hear that song right about now!
-    function_called: play
-    function_value: Shape of You - Ed Sheeran
+Example:
+{
+    "function_called": "play",
+    "function_value": "cute cat videos"
+}
+(Note: function_called is still 'play' even for YouTube searches)
 """

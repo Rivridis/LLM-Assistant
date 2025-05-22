@@ -14,10 +14,6 @@ functions = [
     {"id": "1", "name": "search", "description": search_function},
     {"id": "2", "name": "weather", "description": weather_function},
     {"id": "3", "name": "play", "description": play_functions},
-    {"id": "4", "name": "pause", "description": pause_function},
-    {"id": "5", "name": "read_mail", "description": read_mail_function},
-    {"id": "6", "name": "none", "description": none_function},
-    {"id": "7", "name": "multi_turn_example", "description": multi_turn_example},
 ]
 
 # Add function definitions to ChromaDB
@@ -30,7 +26,17 @@ for function in functions:
 message = [
         {
             "role": "system",
-            "content": "You are a helpful function calling AI that outputs in JSON format. Always Follow the format of giving function called, and function value is the parameter that is to be called. Do not reply to the user's questions. Details about how to use functions are given below. Strictly follow that. Chat memory is given below as well. Use that to call the correct function value. List of functions available are search, weather, play, pause, read_mail, none, multi_turn_example." ,
+            "content": """You are a helpful function calling AI that outputs in JSON format. Do not reply to the user's questions. Details about how to use functions are given below. Strictly follow that. Your previous response is given below. Use that to call the correct function.
+            
+            Functions Available: search, weather, play, pause, read_mail, none, multi_turn_example.
+            Function Descriptions:
+            None Function
+            Used when user is just chatting with the assistant, or the asisistant needs more information from the user
+            {
+                "function_called": "none",     
+                "function_value": ""
+            }
+            """ ,
         },
         {"role": "user", "content": ""},
     ]
@@ -38,7 +44,14 @@ message = [
 message_main = [
         {
             "role": "system",
-            "content": " You are an AI Assistant named Vivy, who responds to the user with helpful information, tips, and jokes just like Jarvis from the marvel universe. You must be answer all the questions truthfully. Use the function call value to formulate your answer. If the function call value is none, then you can chat with the user. You can also refer to the previous conversation. You can also ask the user for more information if needed. Chat memory will be provided below. Don't respond to the user's function call without a valid function value. List of functions available are search, weather, play, pause, read_mail, none, multi_turn_example. Please ignore the function call value if it is uneeded or wrong, and let the user know it failed. Your own response to the question, and the function you called earlier and its value will be given below.",
+            "content": """You are an AI assistant named Vivy, who responds to the the user's questions, using the value provided by the function call. Always follow the values provided in the function result below, and don't make up your own values. If there is any mistake in the provided function result and the user question, let the user know the call failed.
+            You are provided with the chat memory of the conversation. Use it to answer the user's questions or help the user by asking for more information.
+            EXAMPLE
+            System: The value of function call is - weather is [40 celsius, 1013 hPa, Tokyo, Japan]
+            User: Can you tell me the weather right now?
+            
+            Assistant: using the provided function result, The weather right now is 40 celsius with a pressure of 1013 hPa in Tokyo, Japan.
+            """,
         },
         {"role": "user", "content": ""},
     ]
@@ -59,6 +72,24 @@ response_format = {
         },
     }
 
+class MyCustomLLM():
+    # Your ask function will always receive a list of prompts
+    # The prompts are in open ai prompt format
+    #  example: {"role": "system", "content": "You are a helpful assistant."}
+    # If your model supports json format, use the format parameter to specify that to your model.
+    def ask(self, prompts:list, format:str="", temperature:float=0.8):
+        """
+        Args:
+            prompts (list): A list of prompts to ask.
+            format (str, optional): The format of the response. Use "json" for json. Defaults to "".
+            temperature (float, optional): The temperature of the LLM. Defaults to 0.8.
+        """
+        response = llm.create_chat_completion(
+            messages= message_main,
+            temperature=0.7,
+        )
+        return "Your llms response to the prompts goes here!" 
+    
 def process_chat(text):
     print(text)
     global chat_memory
@@ -69,9 +100,12 @@ def process_chat(text):
         n_results=1  # Get the best match
         )
 
+    message_main[0]["content"] += str(chat_memory) + "\n"
     message[1]["content"] = inp
     message[0]["content"] += str(results["documents"][0][0])
+    #print(results["documents"][0][0])
     message[0]["content"] += chat_memory
+    #print(message[0]["content"])
 
 
     # Generate a response
@@ -82,11 +116,10 @@ def process_chat(text):
     )
 
     func = eval(response["choices"][0]["message"]["content"])
+    print(func)
     # Extract and print the JSON response
 
-    opt = ""
-    print(func.get("function_called"))
-    print(func.get("function_value"))
+    function_result = ""
     if func.get("function_called") == "search":
 
         link = []
@@ -109,12 +142,12 @@ def process_chat(text):
         
         if len(mainp) > 1500:
             mainp= mainp[:1500]
-            opt += "The value of function call - search is " + mainp
+            function_result += "The value of function call - search is " + mainp
             opt += "\n"
         
         else:
-            opt += "The value of function call - search is " + mainp
-            opt += "\n" 
+            function_result += "The value of function call - search is " + mainp
+            function_result += "\n" 
             
     if  func.get("function_called") == "youtube":
         match = func.get("function_value")
@@ -135,32 +168,30 @@ def process_chat(text):
     if  func.get("function_called") == "play":
         import pywhatkit
         match = func.get("function_value")
+        print(match)
         pywhatkit.playonyt(str(match))
-        opt += f"Function call - play is successful. Current Song Playing: {str(match)}\n"
+        function_result += f"Function Result: Song has been changed to {match}, which is playing now.\n"
+
 
     if func.get("function_called") == "none":
-        opt += " No function called"
+        function_result += " No function called"
 
 
-
-    message_main[0]["content"] += str(chat_memory)
-    message_main[0]["content"] += opt
+    message_main[0]["content"] += function_result + "\n"
     message_main[1]["content"] += inp + "\n"
+    print(message_main[1]["content"])
 
-    print(len(message_main[0]["content"]))
     response = llm.create_chat_completion(
     messages= message_main,
     temperature=0.7,
     )
 
     out = response["choices"][0]["message"]["content"]
-    print(out)
 
-    chat_memory += " User Message:" + inp
-    chat_memory += " Function Called:" + str(func.get("function_called"))
-    chat_memory += " Assistant Response:" + out
+    chat_memory += " User Message:" + inp + "\n"
+    chat_memory += " Function Called:" + str(func.get("function_called")) + "\n"
+    chat_memory += " Assistant Response:" + function_result
 
-    print(len(chat_memory))
 
     if len(chat_memory) > 2000:
             chat_memory = chat_memory[-2000:]
