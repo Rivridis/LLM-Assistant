@@ -19,13 +19,13 @@ message = [
 message_main = [
         {
             "role": "system",
-            "content": """Your name is Vivy, an assistant  who responds to the the user's questions, using the value provided by the function call. Always follow the values provided in the function result below, and don't make up your own values. If there is any mistake in the provided function result and the user question, let the user know the call failed.
-            You are provided with the chat memory of the conversation. Use it to answer the user's questions or help the user by asking for more information. If no function is called, chat with the user.
+            "content": """Your name is Vivy, an assistant  who responds to the the user's questions, using the value provided by the function call. Always follow the values provided in the function result below, and don't make up your own values. If there is any mistake in the provided function result and the user question, let the user know the call failed. Use the function result to chat with the user.
+            You are provided with the chat memory of the conversation. Use it to answer the user's questions or help the user by asking for more information.
             EXAMPLE
             System: The value of function call is - weather is [40 celsius, 1013 hPa, Tokyo, Japan]
             User: Can you tell me the weather right now?
             
-            Assistant: using the provided function result, The weather right now is 40 celsius with a pressure of 1013 hPa in Tokyo, Japan.
+            Assistant: using the provided function result, The weather right now is 40 celsius with a pressure of 1013 hPa in Tokyo, Japan. Hope you enjoy the weather!.
             """,
         },
         {"role": "user", "content": ""},
@@ -54,7 +54,7 @@ response_format = {
             "properties": {
                 "function_called": {
                     "type": "string",
-                    "enum": ["play", "weather", "none", "search"]
+                    "enum": ["music", "weather", "none", "search","youtube"]
                 },
                 "function_value": {"type": "string"}
             },
@@ -73,7 +73,7 @@ response_google = {
 message_summary = [
         {
             "role": "system",
-            "content": """You are an AI assistant that summarizes the given large wall of google search results, making sure the information relevent to the user query is included in the summary. Give a short summary in a one or two paragraphs.
+            "content": """You are an AI assistant that scans through the given large wall of google search results, and answers the user query using the information from the search results.
             """,
         },
         {"role": "user", "content": ""},

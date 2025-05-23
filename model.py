@@ -73,6 +73,7 @@ def process_chat(text):
 
         website_data = features.read_website(url)
         print(website_data)
+        website_data = website_data[:4000]
 
         message_summary[1]["content"] = str(inp) + "\n" + str(website_data)
 
@@ -82,16 +83,26 @@ def process_chat(text):
         )
 
         summary = response["choices"][0]["message"]["content"]
-        print(summary)
+        chat_memory += " User Message:" + inp + "\n"
+        chat_memory += " Assistant Response:" + summary + "\n"
+        if len(chat_memory) > 3000:
+            chat_memory = chat_memory[-3000:]
+        
+        return(summary)
 
-        function_result += f"The result of the google search, which is to be used for to answer the question is {summary}"
-
-    if  func.get("function_called") == "play":
+    if  func.get("function_called") == "music":
         import pywhatkit
         match = func.get("function_value")
         print(match)
         pywhatkit.playonyt(str(match))
         function_result += f"Function Result: Song has been changed to {match}, which is playing now.\n"
+    
+    if  func.get("function_called") == "youtube":
+        import pywhatkit
+        match = func.get("function_value")
+        print(match)
+        pywhatkit.playonyt(str(match))
+        function_result += f"Function Result: Youtube search video result is {match}, which is playing now.\n"
 
     if func.get("function_called") == "weather":
         location = func.get("function_value")
@@ -122,8 +133,7 @@ def process_chat(text):
     out = response["choices"][0]["message"]["content"]
 
     chat_memory += " User Message:" + inp + "\n"
-    chat_memory += " Function Called:" + str(func.get("function_called")) + "\n"
-    chat_memory += " Assistant Response:" + function_result + "\n"
+    chat_memory += " Assistant Response:" + out + "\n"
 
 
     if len(chat_memory) > 3000:

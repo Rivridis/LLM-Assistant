@@ -67,7 +67,7 @@ def weather(city):
     headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
     
-    url = f"https://wttr.in/{city}?format=3"
+    url = f"https://wttr.in/{city}"
     try:
         response = requests.get(url, headers=headers)
         print(response.text)
@@ -90,5 +90,3 @@ def weather(city):
             return {"error": "Could not fetch weather data."}
     except Exception as e:
         return {"error": str(e)}
-
-print(weather("bangalore, india"))
