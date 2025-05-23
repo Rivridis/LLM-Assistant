@@ -17,7 +17,7 @@ Example:
 weather_function = """Weather Function
 Takes in a location string and returns weather, temperature, and pressure data.
 Default location is Tokyo, Japan if not provided by the user.
-Use this when the user asks about the weather.
+Use this when the user asks about the weather. Strictly follow the format given below, and make sure the function value is a location string.
 
 Example:
 {
