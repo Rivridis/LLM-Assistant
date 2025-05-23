@@ -10,8 +10,9 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 600
-    title: "Windows Assistant"
+    title: "Vivy"
     color: "#1e1e2f"
+    property string selectedMode: "Chat"
     Backend {
         id: backend
     }
@@ -73,12 +74,14 @@ ApplicationWindow {
                 }
 
                 ListView {
+                    id: listViewRef
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    model: ["Chat", "Code", "Translate", "Summarize"]
+                    model: ["Chat", "Code"]
                     delegate: Rectangle {
                         width: parent.width
                         height: 40
+                        radius: 8
                         color: ListView.isCurrentItem ? "#3a3a6f" : "transparent"
 
                         Text {
@@ -89,7 +92,7 @@ ApplicationWindow {
 
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: ListView.view.currentIndex = index
+                            onClicked: listViewRef.currentIndex = index
                         }
                     }
                 }
@@ -98,6 +101,7 @@ ApplicationWindow {
 
         // Chat Panel
         Rectangle {
+            visible: selectedMode === "Chat"
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.left
@@ -111,7 +115,7 @@ ApplicationWindow {
                 spacing: 10
 
                 Label {
-                    text: "Windows Assistant"
+                    text: "Vivy - AI Assistant"
                     color: "#bbb"
                     font.pointSize: 18
                     font.bold: true
