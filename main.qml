@@ -342,19 +342,6 @@ ApplicationWindow {
                                     return codeArea.cursorLine === codeArea.lineCount - 1
                                 }
 
-                                function scrollToCursorLine() {
-                                    let line = codeArea.cursorLine
-                                    let lineHeight = codeArea.lineHeight
-                                    let y = line * lineHeight
-                                    Qt.callLater(function() {
-                                        if (y < codeFlickable.contentY) {
-                                            codeFlickable.contentY = y
-                                        }
-                                        else if (y + lineHeight > codeFlickable.contentY + codeFlickable.height) {
-                                            codeFlickable.contentY = y + lineHeight - codeFlickable.height
-                                        }
-                                    })
-                                }
 
                                 function scrollToLastLine() {
                                     Qt.callLater(function() {
@@ -366,12 +353,17 @@ ApplicationWindow {
                                     })
                                 }
 
+                                property real lastContentY: 0
+
                                 onTextChanged: {
                                     // Only scroll if the cursor is at the last line
                                     if (isCursorAtLastLine()) {
                                         scrollToLastLine()
                                     } else {
-                                        scrollToCursorLine()
+                                        var prevContentY = codeFlickable.contentY
+                                        Qt.callLater(function() {
+                                        codeFlickable.contentY = prevContentY
+                                    })
                                     }
                                 }
 
