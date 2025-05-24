@@ -4,11 +4,10 @@ from PySide6.QtCore import QObject, Slot, Signal, QThread, QMetaObject, Qt, Q_AR
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
-import model
+import model, code_mode
 
 QML_IMPORT_NAME = "mymodule"
 QML_IMPORT_MAJOR_VERSION = 1
-
 class Worker(QObject):
     finished = Signal()
     resultReady = Signal(str)
@@ -16,6 +15,13 @@ class Worker(QObject):
     @Slot(str)
     def process(self, text):
         result = model.process_chat(text)
+        self.resultReady.emit(result)
+        self.finished.emit()
+
+    @Slot(str, str)
+    def code(self, text, code):
+        print(text)
+        result = code_mode.process_chat(text, code)
         self.resultReady.emit(result)
         self.finished.emit()
 
@@ -39,6 +45,16 @@ class Backend(QObject):
             "process",
             Qt.QueuedConnection,
             Q_ARG(str, text)
+        )
+    
+    @Slot(str, str)
+    def code(self, text, code):
+        QMetaObject.invokeMethod(
+            self.worker,
+            "code",
+            Qt.QueuedConnection,
+            Q_ARG(str, text),
+            Q_ARG(str, code)
         )
 
     @Slot(str)

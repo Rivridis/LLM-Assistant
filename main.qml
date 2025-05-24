@@ -104,7 +104,7 @@ ApplicationWindow {
 
         // Chat Panel
         Rectangle {
-            visible: selectedMode === "Nig"
+            visible: selectedMode === "Chat"
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.left
@@ -254,127 +254,186 @@ ApplicationWindow {
                 radius: 10
 
                 RowLayout {
-                    anchors.fill: parent
-                    spacing: 0
+                anchors.fill: parent
+                spacing: 0
 
-                    // Line numbers
-                    ListView {
-                        id: lineNumberView
-                        width: 40
-                        Layout.fillHeight: true
-                        model: codeArea.lineCount
-                        interactive: false
-                        clip: true
-                        delegate: Rectangle {
-                            width: ListView.view.width
-                            height: codeArea.lineHeight
-                            color: index === codeArea.cursorLine ? "#3a3a6f" : "transparent"
-                            Text {
-                                anchors.centerIn: parent
-                                text: (index + 1).toString()
-                                color: "#888"
-                                font.pointSize: 14
-                            }
-                        }
-                        // Sync vertical scroll with codeArea
-                        property bool ignoreSync: false
-                        onContentYChanged: {
-                            if (!ignoreSync && !codeScroll.ignoreSync && Math.abs(contentY - codeFlickable.contentY) > 1) {
-                                codeScroll.ignoreSync = true
-                                codeFlickable.contentY = contentY
-                                codeScroll.ignoreSync = false
-                            }
-                        }
+                // Line numbers
+                ListView {
+                    id: lineNumberView
+                    width: 40
+                    Layout.fillHeight: true
+                    model: codeArea.lineCount
+                    interactive: false
+                    clip: true
+                    delegate: Rectangle {
+                    width: ListView.view.width
+                    height: codeArea.lineHeight
+                    color: index === codeArea.cursorLine ? "#3a3a6f" : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: (index + 1).toString()
+                        color: "#888"
+                        font.pointSize: 14
                     }
-
-                    ScrollView {
-                        id: codeScroll
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        property bool ignoreSync: false
-                        contentItem: Flickable {
-                            id: codeFlickable
-                            contentWidth: codeArea.width
-                            contentHeight: codeArea.height
-                            anchors.fill: parent
-                            onContentYChanged: {
-                                if (!codeScroll.ignoreSync && !lineNumberView.ignoreSync && Math.abs(contentY - lineNumberView.contentY) > 1) {
-                                    lineNumberView.ignoreSync = true
-                                    lineNumberView.contentY = contentY
-                                    lineNumberView.ignoreSync = false
-                                }
-                            }
-                            TextArea {
-                                id: codeArea
-                                wrapMode: TextArea.Wrap
-                                color: "#fff"
-                                font.family: "monospace"
-                                font.pixelSize: 16
-                                background: null
-                                selectByKeyboard: true
-                                verticalAlignment: TextInput.AlignTop
-                                padding: 0
-
-                                property int lineCount: text.length === 0 ? 1 : text.split("\n").length
-                                property int lineHeight: font.pixelSize + 4
-                                property int cursorLine: {
-                                    let t = text.substring(0, codeArea.cursorPosition)
-                                    if (t.length === 0)
-                                        return 0
-                                    // If the cursor is at a newline character, highlight the previous line
-                                    if (codeArea.cursorPosition > 0 && text[codeArea.cursorPosition - 1] === "\n" && codeArea.cursorPosition === text.length)
-                                        return t.split("\n").length - 1
-                                    if (codeArea.cursorPosition > 0 && text[codeArea.cursorPosition - 1] === "\n")
-                                        return t.split("\n").length - 1
-                                    return t.split("\n").length - 1
-                                }
-                                topPadding: 0
-                                bottomPadding: 0
-
-                                property int lastCursorPosition: 0
-
-                                function isCursorAtEnd() {
-                                    return codeArea.cursorPosition === codeArea.text.length
-                                }
-
-                                function isCursorAtLastLine() {
-                                    return codeArea.cursorLine === codeArea.lineCount - 1
-                                }
-
-
-                                function scrollToLastLine() {
-                                    Qt.callLater(function() {
-                                        let totalHeight = codeArea.lineCount * codeArea.lineHeight
-                                        let flickHeight = codeFlickable.height
-                                        if (totalHeight > flickHeight) {
-                                            codeFlickable.contentY = totalHeight - flickHeight
-                                        }
-                                    })
-                                }
-
-                                property real lastContentY: 0
-
-                                onTextChanged: {
-                                    // Only scroll if the cursor is at the last line
-                                    if (isCursorAtLastLine()) {
-                                        scrollToLastLine()
-                                    } else {
-                                        var prevContentY = codeFlickable.contentY
-                                        Qt.callLater(function() {
-                                        codeFlickable.contentY = prevContentY
-                                    })
-                                    }
-                                }
-
-                                
-                            }
-                        }
+                    }
+                    // Sync vertical scroll with codeArea
+                    property bool ignoreSync: false
+                    onContentYChanged: {
+                    if (!ignoreSync && !codeScroll.ignoreSync && Math.abs(contentY - codeFlickable.contentY) > 1) {
+                        codeScroll.ignoreSync = true
+                        codeFlickable.contentY = contentY
+                        codeScroll.ignoreSync = false
+                    }
                     }
                 }
+
+                ScrollView {
+                    id: codeScroll
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    property bool ignoreSync: false
+                    contentItem: Flickable {
+                    id: codeFlickable
+                    contentWidth: codeArea.width
+                    contentHeight: codeArea.height
+                    anchors.fill: parent
+                    onContentYChanged: {
+                        if (!codeScroll.ignoreSync && !lineNumberView.ignoreSync && Math.abs(contentY - lineNumberView.contentY) > 1) {
+                        lineNumberView.ignoreSync = true
+                        lineNumberView.contentY = contentY
+                        lineNumberView.ignoreSync = false
+                        }
+                    }
+                    TextArea {
+                        id: codeArea
+                        wrapMode: TextArea.Wrap
+                        color: "#fff"
+                        font.family: "monospace"
+                        font.pixelSize: 16
+                        background: null
+                        selectByKeyboard: true
+                        verticalAlignment: TextInput.AlignTop
+                        padding: 0
+
+                        property int lineCount: text.length === 0 ? 1 : text.split("\n").length
+                        property int lineHeight: font.pixelSize + 4
+                        property int cursorLine: {
+                        let t = text.substring(0, codeArea.cursorPosition)
+                        if (t.length === 0)
+                            return 0
+                        // If the cursor is at a newline character, highlight the previous line
+                        if (codeArea.cursorPosition > 0 && text[codeArea.cursorPosition - 1] === "\n" && codeArea.cursorPosition === text.length)
+                            return t.split("\n").length - 1
+                        if (codeArea.cursorPosition > 0 && text[codeArea.cursorPosition - 1] === "\n")
+                            return t.split("\n").length - 1
+                        return t.split("\n").length - 1
+                        }
+                        topPadding: 0
+                        bottomPadding: 0
+
+                        property int lastCursorPosition: 0
+
+                        function isCursorAtEnd() {
+                        return codeArea.cursorPosition === codeArea.text.length
+                        }
+
+                        function isCursorAtLastLine() {
+                        return codeArea.cursorLine === codeArea.lineCount - 1
+                        }
+
+                        function scrollToLastLine() {
+                        Qt.callLater(function() {
+                            let totalHeight = codeArea.lineCount * codeArea.lineHeight
+                            let flickHeight = codeFlickable.height
+                            if (totalHeight > flickHeight) {
+                            codeFlickable.contentY = totalHeight - flickHeight
+                            }
+                        })
+                        }
+
+                        property real lastContentY: 0
+
+                        onTextChanged: {
+                        // Only scroll if the cursor is at the last line
+                        if (isCursorAtLastLine()) {
+                            scrollToLastLine()
+                        } else {
+                            var prevContentY = codeFlickable.contentY
+                            Qt.callLater(function() {
+                            codeFlickable.contentY = prevContentY
+                            })
+                        }
+                        }
+                    }
+                    }
+                }
+                }
+            }
+
+            // Input Area below the code editor
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 10
+                Layout.preferredHeight: 60
+
+                Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 50
+                radius: 10
+                color: "#2c2c3f"
+                clip: true
+
+                ScrollView {
+                    anchors.fill: parent
+                    clip: true
+
+                    TextArea {
+                    id: codeInput
+                    wrapMode: TextArea.Wrap
+                    placeholderText: "Type your code prompt..."
+                    color: "#fff"
+                    font.pixelSize: 16
+                    background: null
+                    padding: 10
+                    }
+                }
+                }
+
+                Button {
+                id: codeSend
+                text: "Send"
+                Layout.preferredHeight: 47
+                background: Rectangle {
+                    color: "#5566ff"
+                    radius: 10
+                }
+                enabled: true
+
+                onClicked: {
+                    if (codeInput.text !== "") {
+                    codeSend.enabled = false
+                    let userInput = codeInput.text
+                    let code = codeArea.text
+                    // You can handle the code input here, e.g., send to backend
+                    backend.code(userInput, code)
+                    codeInput.text = ""
+                    }
+                }
+                }
+                Connections {
+                target: backend
+                function onResultReady(val){
+                    // You can handle the backend response here, e.g., insert into codeArea or show a message
+                    codeSend.enabled = true
+                    codeArea.text = ""
+                    codeArea.text = val
+                }
+                }
+            }
             }
         }
     }
     }
-}
+
 
