@@ -6,7 +6,7 @@ message = [
             Functions Available: search, weather, play, pause, read_mail, none, multi_turn_example.
             Function Descriptions:
             None Function
-            Used when user is just chatting with the assistant, or the asisistant needs more information from the user
+            Used when user is just chatting with the assistant, or the asisistant needs more information from the user. Leave the function value empty.
             {
                 "function_called": "none",     
                 "function_value": ""

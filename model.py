@@ -10,7 +10,7 @@ from messages import message, message_main, response_format, response_google, me
 
 chat_memory = ""
 # Load the LLaMA model
-llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", chat_format="chatml",n_ctx=4098,n_gpu_layers=20)
+llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf",n_ctx=4098,n_gpu_layers=20)
 client = chromadb.Client()
 collection = client.get_or_create_collection(name="functions")
 functions = [
@@ -114,7 +114,7 @@ def process_chat(text):
 
 
     if func.get("function_called") == "none":
-        function_result += " No function called"
+        function_result += " No function called, please answer the user's question"
 
 
     message_main[0]["content"] += function_result + "\n"

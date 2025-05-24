@@ -71,6 +71,8 @@ ApplicationWindow {
                     color: "#bbb"
                     font.bold: true
                     font.pointSize: 14
+                    horizontalAlignment: Text.AlignHCenter
+                    Layout.alignment: Qt.AlignHCenter
                 }
 
                 ListView {
@@ -88,6 +90,7 @@ ApplicationWindow {
                             anchors.centerIn: parent
                             color: "#fff"
                             text: modelData
+                            font.pixelSize: 16
                         }
 
                         MouseArea {
