@@ -131,6 +131,17 @@ ApplicationWindow {
                     ListElement { sender: "AI"; message: "Hello, This is Vivy, how can I help you today?" }
                 }
 
+                // Clear chatModel when switching from Code to Chat mode
+                Connections {
+                    target: window
+                    function onSelectedModeChanged() {
+                        if (selectedMode === "Chat") {
+                            chatModel.clear()
+                            chatModel.append({ sender: "AI", message: "Hello, This is Vivy, how can I help you today?" })
+                        }
+                    }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -144,7 +155,7 @@ ApplicationWindow {
                         clip: true
 
                         delegate: Column {
-                            width: parent.width
+                            width: ListView.view.width
                             spacing: 4
                             padding: 10
 

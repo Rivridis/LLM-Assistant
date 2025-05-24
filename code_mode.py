@@ -1,6 +1,6 @@
 from llama_cpp import Llama
+from model import llm
 
-llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf", chat_format="chatml",n_ctx=4098,n_gpu_layers=20)
 message = [
         {
             "role": "system",
