@@ -23,14 +23,15 @@ for file in os.listdir(model_dir):
 
 if model_file is None:
     print("No .gguf model file found in the 'model' directory.")
-    sys.exit(1)
+    #sys.exit(1)
 
 try:
     llm = Llama(model_path=model_file, n_ctx=4098, n_gpu_layers=20)
 
 except Exception as e:
     print(f"Error loading LLaMA model: {e}")
-    sys.exit(1)
+    llm = None
+    #sys.exit(1)
 
 client = chromadb.Client()
 collection = client.get_or_create_collection(name="functions")
@@ -69,7 +70,8 @@ def process_chat(text):
     message[0]["content"] += chat_memory
 
 
-
+    if llm == None:
+     return("Model not loaded. Please place your model in the 'model' directory and restart the app.")
     # Generate a response
     response = llm.create_chat_completion(
         messages= message,

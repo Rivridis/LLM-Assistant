@@ -55,6 +55,8 @@ class PDFChatAssistant:
         )
 
     def process_chat(self, text, url):
+        if llm == None:
+            return("Model not loaded. Please place your model in the 'model' directory and restart the app.")
         if self.filepath == "":
             self.filepath = self.parse_file_url(url)
             self.load_pdf(self.filepath)

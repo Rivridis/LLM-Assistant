@@ -12,6 +12,8 @@ message = [
     ]
 
 def process_chat(text, code):
+    if llm == None:
+     return("Model not loaded. Please place your model in the 'model' directory and restart the app.")
     message[1]["content"] = ""
 
     message[1]["content"] = text + "\n"

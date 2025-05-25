@@ -42,23 +42,35 @@ ApplicationWindow {
             radius: 10
 
             ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 20
-                spacing: 20
-                Label {
-                    text: "Settings"
-                    color: "#bbb"
-                    font.pointSize: 18
-                    font.bold: true
-                    horizontalAlignment: Text.AlignHCenter
-                    Layout.alignment: Qt.AlignHCenter
-                }
-                Item { Layout.fillHeight: true }
-                Button {
-                    text: "Close"
-                    Layout.alignment: Qt.AlignHCenter
-                    onClicked: settingsPopup.close()
-                }
+            anchors.fill: parent
+            anchors.margins: 20
+            spacing: 20
+
+            Label {
+                text: "Settings"
+                color: "#bbb"
+                font.pointSize: 18
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                Layout.alignment: Qt.AlignHCenter
+            }
+
+            Item { Layout.fillHeight: true }
+
+            Button {
+                text: "Download (coming soon)"
+                Layout.alignment: Qt.AlignHCenter
+                enabled: false
+                opacity: 0.6
+            }
+
+            Item { Layout.fillHeight: true }
+
+            Button {
+                text: "Close"
+                Layout.alignment: Qt.AlignHCenter
+                onClicked: settingsPopup.close()
+            }
             }
         }
     }
