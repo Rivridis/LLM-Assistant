@@ -5,6 +5,8 @@ from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 import model, code_mode
+from pdf_mode import PDFChatAssistant
+assistant = PDFChatAssistant()
 
 QML_IMPORT_NAME = "mymodule"
 QML_IMPORT_MAJOR_VERSION = 1
@@ -21,7 +23,15 @@ class Worker(QObject):
     @Slot(str, str)
     def code(self, text, code):
         print(text)
+        print("me")
         result = code_mode.process_chat(text, code)
+        self.resultReady.emit(result)
+        self.finished.emit()
+
+    @Slot(str, str)
+    def pdf(self, text, url):
+        print(text)
+        result = assistant.process_chat(text, url)
         self.resultReady.emit(result)
         self.finished.emit()
 
@@ -55,6 +65,16 @@ class Backend(QObject):
             Qt.QueuedConnection,
             Q_ARG(str, text),
             Q_ARG(str, code)
+        )
+
+    @Slot(str, str)
+    def pdf(self, text, url):
+        QMetaObject.invokeMethod(
+            self.worker,
+            "pdf",
+            Qt.QueuedConnection,
+            Q_ARG(str, text),
+            Q_ARG(str, url)
         )
 
     @Slot(str)

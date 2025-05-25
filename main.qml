@@ -3,7 +3,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
+import QtQuick.Dialogs
 import mymodule
+
+
 
 ApplicationWindow {
     id: window
@@ -15,6 +18,21 @@ ApplicationWindow {
     property string selectedMode: "Chat"
     Backend {
         id: backend
+    }
+    
+    property string selectedFilePath: ""
+
+    FileDialog {
+        id: file
+        title: "Please choose a file"
+        nameFilters: ["PDF files (*.pdf)"]
+        onAccepted: {
+            selectedFilePath = file.selectedFile
+            console.log("You chose: " + selectedFilePath)
+        }
+        onRejected: {
+            console.log("Canceled")
+        }
     }
 
     Rectangle {
@@ -79,7 +97,7 @@ ApplicationWindow {
                     id: listViewRef
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    model: ["Chat", "Code"]
+                    model: ["Chat", "Code", "PDF"]
                     delegate: Rectangle {
                         width: parent.width
                         height: 40
@@ -447,7 +465,156 @@ ApplicationWindow {
             }
             }
         }
+
+        // PDF viewer panel
+       Rectangle {
+            visible: selectedMode === "PDF"
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.leftMargin: 280
+            anchors.right: parent.right
+            color: "#1f1f2f"
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 10
+
+                Label {
+                    text: "Vivy - PDF mode"
+                    color: "#bbb"
+                    font.pointSize: 18
+                    font.bold: true
+                    Layout.alignment: Qt.AlignHCenter
+                    padding : 10
+                }
+
+                ListModel {
+                    id: chatModelP
+                    ListElement { sender: "AI"; message: "Please upload a PDF document to continue" }
+                }
+
+                // Clear chatModel when switching from Code to Chat mode
+                Connections {
+                    target: window
+                    function onSelectedModeChanged() {
+                        if (selectedMode === "PDF") {
+                            chatModelP.clear()
+                            chatModelP.append({ sender: "AI", message: "Please upload a PDF document to continue" })
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: "#2c2c3f"
+                    radius: 10
+
+                    ListView {
+                        id: msgfieldP
+                        anchors.fill: parent
+                        model: chatModelP
+                        clip: true
+
+                        delegate: Column {
+                            width: ListView.view.width
+                            spacing: 4
+                            padding: 10
+
+                            Text {
+                                text: model.sender + ": " + model.message
+                                color: model.sender === "User" ? "#fff" : "#bbb"
+                                wrapMode: Text.Wrap
+                                width: parent.width - 40
+                                font.pointSize: 14
+                            }
+                        }
+                    }
+                }
+
+                // Input Area
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    Layout.preferredHeight: 60
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 50
+                        radius: 10
+                        color: "#2c2c3f"
+                        clip: true
+
+                        ScrollView {
+                            anchors.fill: parent
+                            clip: true
+
+                            TextArea {
+                                id: mytextP
+                                wrapMode: TextArea.Wrap
+                                placeholderText: "Type your message..."
+                                color: "#fff"
+                                font.pixelSize: 16
+                                background: null  // remove default background
+                                padding: 10
+                            }
+                        }
+                    }
+                
+
+                    Button {
+                        id: sendP
+                        text: "Send"
+                        Layout.preferredHeight: 47
+                        background: Rectangle {
+                            color: "#5566ff"
+                            radius: 10
+                        }
+                        enabled: true  // Initially enabled
+
+                        onClicked: {
+                            if (mytextP.text !== "" && selectedFilePath !== "") {
+                                sendP.enabled = false
+                                let userInput = mytextP.text
+                                chatModelP.append({ sender: "User", message: userInput })
+                                mytextP.text = ""
+                                msgfieldP.positionViewAtEnd()
+                                backend.pdf(userInput, selectedFilePath)
+
+                            }
+                        }         
+                    }
+
+                    Button {
+                        id: upload
+                        text: "Upload"
+                        Layout.preferredHeight: 47
+                        background: Rectangle {
+                            color: "#5566ff"
+                            radius: 10
+                        }
+                        enabled: true  // Initially enabled
+
+                        onClicked: {
+                            file.open()
+                        }         
+                    }
+
+                Connections {
+                target: backend
+                function onResultReady(val){
+                    chatModelP.append({ sender: "AI", message: val })
+                    sendP.enabled = true
+                    msgfieldP.positionViewAtEnd()
+                        }
+                    }
+                }
+            }
+        }
+
     }
-    }
+}
 
 
