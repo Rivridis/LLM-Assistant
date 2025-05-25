@@ -1,4 +1,3 @@
-from json import load
 import chromadb
 from model import llm
 from pathlib import Path

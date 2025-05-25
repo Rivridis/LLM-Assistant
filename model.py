@@ -1,16 +1,12 @@
-import re
 from llama_cpp import Llama
 import chromadb
-from duckduckgo_search import DDGS
 import features
 from functions import *
-from trafilatura import fetch_url, extract
 from messages import message, message_main, response_format, response_google, message_google, message_summary
 import os
 
 chat_memory = ""
 # Load the LLaMA model
-import sys
 
 model_dir = r"model"
 model_file = None

@@ -1,4 +1,3 @@
-from llama_cpp import Llama
 from model import llm
 
 message = [
