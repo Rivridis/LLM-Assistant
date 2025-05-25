@@ -73,7 +73,7 @@ class PDFChatAssistant:
         if len(self.message[0]["content"]) > max_length:
             # Truncate chat_history to keep the most recent part, but keep main_instructions intact
             truncated_history = chat_history[-(max_length - len(main_instructions)):]
-            self.message[0]["content"] = main_instructions + truncated_history
+            self.message[0]["content"] = main_instructions + "MAIN" + truncated_history
 
         response = llm.create_chat_completion(
         messages= self.message,
