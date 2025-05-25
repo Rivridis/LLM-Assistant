@@ -271,7 +271,7 @@ ApplicationWindow {
             spacing: 10
 
             Label {
-                text: "Vivy - Code Editor"
+                text: "Code Editor"
                 color: "#bbb"
                 font.pointSize: 18
                 font.bold: true
@@ -462,6 +462,15 @@ ApplicationWindow {
                     codeArea.text = val
                 }
                 }
+
+                Connections {
+                    target: window
+                    function onSelectedModeChanged() {
+                        if (selectedMode === "Code") {
+                            codeArea.text = ""
+                        }
+                    }
+                }
             }
             }
         }
@@ -482,7 +491,7 @@ ApplicationWindow {
                 spacing: 10
 
                 Label {
-                    text: "Vivy - PDF mode"
+                    text: "PDF mode"
                     color: "#bbb"
                     font.pointSize: 18
                     font.bold: true

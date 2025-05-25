@@ -37,8 +37,13 @@ def process_chat(text):
         n_results=1  # Get the best match
         )
 
+    message_main[0]["content"] =  message_main[0]["content"].split("MAIN")[0]
+    message_main[0]["content"] += "\nMAIN" + "\n"
     message_main[0]["content"] += str(chat_memory) + "\n"
+    
     message[1]["content"] = inp
+    message[0]["content"] = message[0]["content"].split("MAIN")[0]
+    message[0]["content"] += "\nMAIN" + "\n"
     message[0]["content"] += str(results["documents"][0][0])
     message[0]["content"] += chat_memory
 
@@ -85,8 +90,8 @@ def process_chat(text):
         summary = response["choices"][0]["message"]["content"]
         chat_memory += " User Message:" + inp + "\n"
         chat_memory += " Assistant Response:" + summary + "\n"
-        if len(chat_memory) > 3000:
-            chat_memory = chat_memory[-3000:]
+        if len(chat_memory) > 5000:
+            chat_memory = chat_memory[-5000:]
         
         return(summary)
 
@@ -121,8 +126,8 @@ def process_chat(text):
     message_main[1]["content"] += inp + "\n"
     print(message_main[1]["content"])
 
-    if len(chat_memory) > 3000:
-        chat_memory = chat_memory[-3000:]
+    if len(chat_memory) > 5000:
+        chat_memory = chat_memory[-5000:]
 
 
     response = llm.create_chat_completion(
@@ -136,7 +141,7 @@ def process_chat(text):
     chat_memory += " Assistant Response:" + out + "\n"
 
 
-    if len(chat_memory) > 3000:
-            chat_memory = chat_memory[-3000:]
+    if len(chat_memory) > 5000:
+            chat_memory = chat_memory[-5000:]
     print(chat_memory)
     return(out)

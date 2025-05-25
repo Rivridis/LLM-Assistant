@@ -3,7 +3,6 @@ message = [
             "role": "system",
             "content": """You are a helpful function calling AI that outputs in JSON format. Do not reply to the user's questions. Details about how to use functions are given below. Strictly follow that. Your previous response is given below. Use that to call the correct function.
             
-            Functions Available: search, weather, play, pause, read_mail, none, multi_turn_example.
             Function Descriptions:
             None Function
             Used when user is just chatting with the assistant, or the asisistant needs more information from the user. Leave the function value empty.
@@ -11,6 +10,7 @@ message = [
                 "function_called": "none",     
                 "function_value": ""
             }
+            MAIN
             """ ,
         },
         {"role": "user", "content": ""},
@@ -26,6 +26,7 @@ message_main = [
             User: Can you tell me the weather right now?
             
             Assistant: using the provided function result, The weather right now is 40 celsius with a pressure of 1013 hPa in Tokyo, Japan. Hope you enjoy the weather!.
+            MAIN
             """,
         },
         {"role": "user", "content": ""},
