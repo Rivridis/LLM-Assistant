@@ -22,6 +22,48 @@ ApplicationWindow {
     
     property string selectedFilePath: ""
 
+    // tiny setting popup
+    Popup {
+        id: settingsPopup
+        width: 500
+        height: 400
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+        anchors.centerIn: parent
+        background: Rectangle {
+            color: "transparent"
+            border.width: 0
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: "#2e2e4f"
+            radius: 10
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 20
+                Label {
+                    text: "Settings"
+                    color: "#bbb"
+                    font.pointSize: 18
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    Layout.alignment: Qt.AlignHCenter
+                }
+                Item { Layout.fillHeight: true }
+                Button {
+                    text: "Close"
+                    Layout.alignment: Qt.AlignHCenter
+                    onClicked: settingsPopup.close()
+                }
+            }
+        }
+    }
+
+
     FileDialog {
         id: file
         title: "Please choose a file"
@@ -65,6 +107,10 @@ ApplicationWindow {
                         source: "icons/settings.svg"
                         anchors.centerIn: parent
                         fillMode: Image.PreserveAspectFit
+                    }
+
+                    onClicked: {
+                        settingsPopup.open()
                     }
                 }
             }

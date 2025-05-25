@@ -6,11 +6,32 @@ import features
 from functions import *
 from trafilatura import fetch_url, extract
 from messages import message, message_main, response_format, response_google, message_google, message_summary
-
+import os
 
 chat_memory = ""
 # Load the LLaMA model
-llm = Llama(model_path=r"model\neuralhermes-2.5-mistral-7b.Q5_K_M.gguf",n_ctx=4098,n_gpu_layers=20)
+import sys
+
+model_dir = r"model"
+model_file = None
+
+# Find any .gguf model file in the model directory
+for file in os.listdir(model_dir):
+    if file.endswith(".gguf"):
+        model_file = os.path.join(model_dir, file)
+        break
+
+if model_file is None:
+    print("No .gguf model file found in the 'model' directory.")
+    sys.exit(1)
+
+try:
+    llm = Llama(model_path=model_file, n_ctx=4098, n_gpu_layers=20)
+
+except Exception as e:
+    print(f"Error loading LLaMA model: {e}")
+    sys.exit(1)
+
 client = chromadb.Client()
 collection = client.get_or_create_collection(name="functions")
 functions = [
