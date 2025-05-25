@@ -1,3 +1,4 @@
+import llama_cpp
 from llama_cpp import Llama
 import chromadb
 import features
