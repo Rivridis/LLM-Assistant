@@ -13,7 +13,7 @@ ApplicationWindow {
     visible: true
     width: 1000
     height: 600
-    title: "Vivy"
+    title: "Windows Assistant"
     color: "#1e1e2f"
     property string selectedMode: "Chat"
     Backend {
