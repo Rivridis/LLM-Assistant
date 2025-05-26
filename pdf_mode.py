@@ -1,4 +1,5 @@
 import chromadb
+from chromadb.config import Settings
 from model import llm
 from pathlib import Path
 from pypdf import PdfReader
@@ -8,7 +9,7 @@ class PDFChatAssistant:
     def __init__(self):
         self.chat_memory = ""
         self.filepath = ""
-        self.client_pdf = chromadb.Client()
+        self.client_pdf = chromadb.Client(Settings(anonymized_telemetry=False))
         self.collection = None
         self.message = [
             {

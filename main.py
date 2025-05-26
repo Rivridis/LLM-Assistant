@@ -6,7 +6,9 @@ from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 import model, code_mode
 from pdf_mode import PDFChatAssistant
+import os
 assistant = PDFChatAssistant()
+os.environ["OPENTELEMETRY_PYTHON_CONTEXT"] = "contextvars"
 
 QML_IMPORT_NAME = "mymodule"
 QML_IMPORT_MAJOR_VERSION = 1

@@ -1,10 +1,12 @@
 import llama_cpp
 from llama_cpp import Llama
 import chromadb
+from chromadb.config import Settings
 import features
 from functions import *
 from messages import message, message_main, response_format, response_google, message_google, message_summary
 import os
+import pywhatkit
 
 chat_memory = ""
 # Load the LLaMA model
@@ -30,7 +32,7 @@ except Exception as e:
     llm = None
     #sys.exit(1)
 
-client = chromadb.Client()
+client = chromadb.Client(Settings(anonymized_telemetry=False))
 collection = client.get_or_create_collection(name="functions")
 functions = [
     {"id": "1", "name": "search", "description": search_function},
@@ -116,14 +118,12 @@ def process_chat(text):
         return(summary)
 
     if  func.get("function_called") == "music":
-        import pywhatkit
         match = func.get("function_value")
         print(match)
         pywhatkit.playonyt(str(match))
         function_result += f"Function Result: Song has been changed to {match}, which is playing now.\n"
     
     if  func.get("function_called") == "youtube":
-        import pywhatkit
         match = func.get("function_value")
         print(match)
         pywhatkit.playonyt(str(match))
