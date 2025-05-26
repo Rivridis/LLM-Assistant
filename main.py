@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from PySide6.QtCore import QObject, Slot, Signal, QThread, QMetaObject, Qt, Q_ARG
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine, QmlElement
 from PySide6.QtQuickControls2 import QQuickStyle
 import model, code_mode
@@ -89,6 +89,8 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     QQuickStyle.setStyle("FluentWinUI3")
     engine = QQmlApplicationEngine()
+    app_icon = QIcon("app_icon.ico")
+    QGuiApplication.setWindowIcon(app_icon)
     qml_file = Path(__file__).resolve().parent / "main.qml"
     engine.load(qml_file)
     if not engine.rootObjects():
