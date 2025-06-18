@@ -67,13 +67,14 @@ def weather(city):
     headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
     
-    url = f"https://wttr.in/{city}"
+    url = f"https://wttr.in/{city}?format=j1"
     try:
         response = requests.get(url, headers=headers)
-        print(response.text)
         if response.status_code == 200:
             data = response.json()
             current = data['current_condition'][0]
+            country = data['nearest_area'][0]['country'][0]['value']
+            region = data['nearest_area'][0]['region'][0]['value']
             description = current['weatherDesc'][0]['value']
             temperature = current['temp_C']
             humidity = current['humidity']
@@ -84,7 +85,9 @@ def weather(city):
                 "temperature_C": temperature,
                 "feels_like_C": feels_like,
                 "humidity_percent": humidity,
-                "wind_kmph": wind_speed
+                "wind_kmph": wind_speed,
+                "country": country,
+                "region": region
             }
         else:
             return {"error": "Could not fetch weather data."}
