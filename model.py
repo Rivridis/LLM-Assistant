@@ -54,9 +54,11 @@ def process_chat(text):
     message_main[1]["content"] = ""
     inp = text
     results = collection.query(
-        query_texts=[inp],
+        query_texts=[inp+chat_memory],
         n_results=1  # Get the best match
         )
+    
+    print(results)
 
     message_main[0]["content"] =  message_main[0]["content"].split("MAIN")[0]
     message_main[0]["content"] += "\nMAIN" + "\n"
@@ -139,7 +141,7 @@ def process_chat(text):
 
 
     if func.get("function_called") == "none":
-        function_result += " No function called, please answer the user's question"
+        function_result += " No function is called and No function will be called. Please answer the user's question or ask the user for more information, without calling any function.\n"
 
 
     message_main[0]["content"] += function_result + "\n"
